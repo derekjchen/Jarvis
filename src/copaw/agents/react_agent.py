@@ -323,7 +323,7 @@ class CoPawAgent(ReActAgent):
             if hasattr(self.memory_manager, 'enable_v2') and self.memory_manager.enable_v2:
                 semantic_memory_hook = SemanticMemoryHook(
                     memory_manager=self.memory_manager,
-                    extract_on_user_only=True,
+                    analyze_every_n_messages=1,  # Analyze every message
                 )
                 self.register_instance_hook(
                     hook_type="post_reasoning",
