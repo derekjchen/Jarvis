@@ -18,7 +18,7 @@ from anyio import ClosedResourceError
 from pydantic import BaseModel
 
 from .command_handler import CommandHandler
-from .hooks import BootstrapHook, MemoryCompactionHook
+from .hooks import BootstrapHook, MemoryCompactionHook, SemanticMemoryHook
 from .model_factory import create_model_and_formatter
 from .prompt import build_system_prompt_from_working_dir
 from .skills_manager import (
@@ -318,6 +318,19 @@ class CoPawAgent(ReActAgent):
                 hook=memory_compact_hook.__call__,
             )
             logger.debug("Registered memory compaction hook")
+
+            # Semantic memory hook - extract entities after each conversation
+            if hasattr(self.memory_manager, 'enable_v2') and self.memory_manager.enable_v2:
+                semantic_memory_hook = SemanticMemoryHook(
+                    memory_manager=self.memory_manager,
+                    extract_on_user_only=True,
+                )
+                self.register_instance_hook(
+                    hook_type="post_reasoning",
+                    hook_name="semantic_memory_hook",
+                    hook=semantic_memory_hook.__call__,
+                )
+                logger.debug("Registered semantic memory hook (V2)")
 
     def rebuild_sys_prompt(self) -> None:
         """Rebuild and replace the system prompt.
