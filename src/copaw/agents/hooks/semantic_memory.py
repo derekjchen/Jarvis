@@ -55,11 +55,9 @@ class SemanticMemoryHook:
 
             # Check if V2 is enabled
             if not hasattr(self.memory_manager, 'enable_v2'):
-                logger.debug("V2 not available (no enable_v2 attribute)")
                 return output
 
             if not self.memory_manager.enable_v2:
-                logger.debug("V2 disabled")
                 return output
 
             # Analyze every N messages
@@ -68,29 +66,37 @@ class SemanticMemoryHook:
 
             logger.info(f"[SemanticMemoryHook] Triggering V2 analysis (message #{self.message_count})")
 
-            # Get text from the output message (agent's response)
-            # We extract entities from the conversation, focusing on user input
+            # Get recent messages from agent's memory
             text_parts = []
             
-            # Get text from kwargs (user input)
-            if 'x' in kwargs:
-                msgs = kwargs['x']
-                if isinstance(msgs, list):
-                    for msg in msgs:
-                        if hasattr(msg, 'content'):
-                            if isinstance(msg.content, str):
-                                text_parts.append(msg.content)
-                            elif isinstance(msg.content, list):
-                                for item in msg.content:
+            try:
+                # Get all messages from memory
+                all_messages = await agent.memory.get_memory(
+                    exclude_mark=None,
+                    prepend_summary=False,
+                )
+                
+                # Get the last user message (most recent)
+                if all_messages:
+                    for msg in reversed(all_messages):
+                        if hasattr(msg, 'role') and msg.role == 'user':
+                            content = msg.content
+                            if isinstance(content, str):
+                                text_parts.append(content)
+                            elif isinstance(content, list):
+                                for item in content:
                                     if isinstance(item, dict) and item.get('type') == 'text':
                                         text_parts.append(item.get('text', ''))
+                            break  # Only get the last user message
+            except Exception as e:
+                logger.warning(f"[SemanticMemoryHook] Failed to get messages from memory: {e}")
 
             if not text_parts:
-                logger.debug("[SemanticMemoryHook] No text content found")
+                logger.debug("[SemanticMemoryHook] No user text found in memory")
                 return output
 
             combined_text = "\n".join(text_parts)
-            logger.info(f"[SemanticMemoryHook] Analyzing text: {combined_text[:100]}...")
+            logger.info(f"[SemanticMemoryHook] Analyzing: {combined_text[:100]}...")
 
             # Extract entities using V2
             entities = await self.memory_manager.extract_entities(combined_text)
@@ -99,7 +105,7 @@ class SemanticMemoryHook:
                 entity_names = [getattr(e, 'name', str(e)) for e in entities[:5]]
                 logger.info(f"[SemanticMemoryHook] Extracted {len(entities)} entities: {entity_names}")
             else:
-                logger.debug("[SemanticMemoryHook] No entities extracted")
+                logger.debug("[SemanticMemoryHook] No entities extracted from this message")
 
         except Exception as e:
             logger.error(f"[SemanticMemoryHook] Failed: {e}", exc_info=True)
