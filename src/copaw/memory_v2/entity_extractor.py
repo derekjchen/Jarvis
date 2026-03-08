@@ -24,12 +24,12 @@ EXTRACTION_PROMPT = """请从以下文本中提取所有重要实体。
 
 请以 JSON 格式返回实体列表：
 [
-  {
+  {{
     "name": "实体名称",
     "type": "person|project|technology|date|concept|organization|location",
     "description": "简短描述",
-    "attributes": {"key": "value"}
-  }
+    "attributes": {{"key": "value"}}
+  }}
 ]
 
 注意：
@@ -102,17 +102,35 @@ class EntityExtractor:
         Returns:
             The LLM response text
         """
-        from agentscope.message import Msg
-
-        msg = Msg(role="user", content=prompt)
-        response = self.chat_model(msg)
-
-        if hasattr(response, "content"):
-            return response.content
-        elif hasattr(response, "text"):
-            return response.text
-        else:
-            return str(response)
+        logger.info(f"[EntityExtractor._call_llm] Calling LLM with prompt (len={len(prompt)})")
+        
+        try:
+            # 使用字典格式的消息列表（模型期望 list[dict]）
+            messages = [{"role": "user", "content": prompt}]
+            
+            # 调用模型（返回 AsyncGenerator 因为 stream=True）
+            response_gen = await self.chat_model(messages)
+            logger.info(f"[EntityExtractor._call_llm] Response type: {type(response_gen).__name__}")
+            
+            # 流式响应：最后一个 chunk 包含完整内容
+            last_chunk = None
+            async for chunk in response_gen:
+                last_chunk = chunk
+            
+            # 从最后一个 chunk 提取文本
+            if last_chunk and hasattr(last_chunk, "content"):
+                for block in last_chunk.content:
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        text = block.get("text", "")
+                        logger.info(f"[EntityExtractor._call_llm] Text (len={len(text)}): {text[:500]}...")
+                        return text
+            
+            logger.warning("[EntityExtractor._call_llm] No text content found in response")
+            return ""
+            
+        except Exception as e:
+            logger.error(f"[EntityExtractor._call_llm] Exception: {type(e).__name__}: {e}")
+            raise
 
     # =========================================================================
     # WORKAROUND: _extract_entities_with_regex
