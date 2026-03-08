@@ -73,6 +73,9 @@ class EntityExtractor:
             prompt = EXTRACTION_PROMPT.format(text=text)
             response = await self._call_llm(prompt)
 
+            # Debug: log raw LLM response
+            logger.debug(f"LLM response for entity extraction (len={len(response)}): {response[:500]}...")
+
             # Parse response
             entities = self._parse_response(response)
 
@@ -85,6 +88,7 @@ class EntityExtractor:
 
         except Exception as e:
             logger.error(f"Failed to extract entities: {e}")
+            logger.debug(f"Exception type: {type(e).__name__}, text preview: {text[:100]}")
             return []
 
     async def _call_llm(self, prompt: str) -> str:
