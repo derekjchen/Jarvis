@@ -117,29 +117,48 @@ class EntityExtractor:
         Returns:
             List of Entity objects
         """
+        data = None
+        parse_error = None
+
         try:
             # Try direct JSON parse
             data = json.loads(response)
-        except json.JSONDecodeError:
-            # Try to extract JSON from markdown
-            if "```json" in response:
-                start = response.find("```json") + 7
-                end = response.find("```", start)
-                if end > start:
-                    data = json.loads(response[start:end].strip())
-            elif "```" in response:
-                start = response.find("```") + 3
-                end = response.find("```", start)
-                if end > start:
-                    data = json.loads(response[start:end].strip())
-            elif "[" in response:
-                start = response.find("[")
-                end = response.rfind("]") + 1
-                if end > start:
-                    data = json.loads(response[start:end])
-            else:
-                logger.warning("Failed to parse entity extraction response")
-                return []
+        except json.JSONDecodeError as e:
+            parse_error = e
+            # Try to extract JSON from markdown - each attempt protected
+            try:
+                if "```json" in response:
+                    start = response.find("```json") + 7
+                    end = response.find("```", start)
+                    if end > start:
+                        data = json.loads(response[start:end].strip())
+            except json.JSONDecodeError:
+                pass
+
+            if data is None:
+                try:
+                    if "```" in response:
+                        start = response.find("```") + 3
+                        end = response.find("```", start)
+                        if end > start:
+                            data = json.loads(response[start:end].strip())
+                except json.JSONDecodeError:
+                    pass
+
+            if data is None:
+                try:
+                    if "[" in response:
+                        start = response.find("[")
+                        end = response.rfind("]") + 1
+                        if end > start:
+                            data = json.loads(response[start:end])
+                except json.JSONDecodeError:
+                    pass
+
+        if data is None:
+            logger.warning(f"Failed to parse entity extraction response: {parse_error}")
+            logger.debug(f"Response preview: {response[:200]}...")
+            return []
 
         # Build Entity objects
         entities = []
