@@ -21,10 +21,21 @@
   {
     "test_id": "T17_CROSS_SESSION",
     "category": "cross_session",
-    "description": "跨会话测试 - 验证记忆",
+    "description": "跨会话测试 - 验证记忆（同一session）",
     "input": "我是谁？我负责什么？",
-    "session_id": "cross_session_002",
+    "session_id": "cross_session_001",
     "expected_recall": ["王刚", "AI研发"],
     "depends_on": ["T15_MULTI_PART1", "T16_MULTI_PART2"]
+  },
+  {
+    "test_id": "T17_CROSS_USER",
+    "category": "cross_session",
+    "description": "跨会话测试 - 不同用户验证记忆隔离",
+    "input": "我叫李四，是产品经理",
+    "session_id": "cross_session_002",
+    "expected_entities": [
+      {"name": "李四", "type": "person"},
+      {"name": "产品经理", "type": "concept"}
+    ]
   }
 ]
