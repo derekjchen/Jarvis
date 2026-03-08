@@ -1,0 +1,34 @@
+[
+  {
+    "test_id": "T08_DECISION",
+    "category": "memory_type",
+    "description": "测试决策类型识别",
+    "input": "经过讨论，我们决定采用微服务架构而不是单体架构",
+    "expected_memory_type": "decision",
+    "importance_threshold": 0.7
+  },
+  {
+    "test_id": "T09_EVENT",
+    "category": "memory_type",
+    "description": "测试事件类型识别",
+    "input": "项目昨天成功上线，用户反馈很好",
+    "expected_memory_type": "event",
+    "importance_threshold": 0.5
+  },
+  {
+    "test_id": "T10_KNOWLEDGE",
+    "category": "memory_type",
+    "description": "测试知识类型识别",
+    "input": "系统使用REST API进行服务间通信，数据格式是JSON",
+    "expected_memory_type": "knowledge",
+    "importance_threshold": 0.3
+  },
+  {
+    "test_id": "T11_TODO",
+    "category": "memory_type",
+    "description": "测试待办类型识别",
+    "input": "下周需要完成代码审查和性能测试",
+    "expected_memory_type": "todo",
+    "importance_threshold": 0.4
+  }
+]

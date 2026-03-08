@@ -1,0 +1,45 @@
+[
+  {
+    "test_id": "T18_EMPTY",
+    "category": "edge_cases",
+    "description": "测试空输入处理",
+    "input": "你好",
+    "expected_behavior": "正常响应，不报错"
+  },
+  {
+    "test_id": "T19_SPECIAL_CHARS",
+    "category": "edge_cases",
+    "description": "测试特殊字符处理",
+    "input": "文件路径是 /root/data/test-file_v2.json，配置项是 {\"key\": \"value\"}",
+    "expected_behavior": "正确处理特殊字符，不触发JSON解析错误"
+  },
+  {
+    "test_id": "T20_LONG_TEXT",
+    "category": "edge_cases",
+    "description": "测试长文本处理",
+    "input": "这是一个关于航天领域的详细介绍。航天技术是探索、开发和利用太空的综合技术。它包括航天器技术、运载火箭技术、测控技术、发射场技术、着陆技术等多个方面。近年来，商业航天快速发展，SpaceX、蓝色起源等公司推动了火箭回收技术的进步，大幅降低了发射成本。中国的商业航天也在崛起，多家民营企业进入火箭发射、卫星制造等领域。随着技术进步，卫星互联网、太空旅游、小行星采矿等新兴领域正在发展。未来十年，航天产业将迎来更大的变革。",
+    "expected_behavior": "正确处理长文本，提取关键实体",
+    "expected_entities": [
+      {"name": "SpaceX", "type": "organization"},
+      {"name": "蓝色起源", "type": "organization"}
+    ]
+  },
+  {
+    "test_id": "T21_JSON_IN_TEXT",
+    "category": "edge_cases",
+    "description": "测试文本中嵌入JSON",
+    "input": "服务器返回了错误：{\"error\": \"timeout\", \"code\": 500}，请检查网络",
+    "expected_behavior": "不将文本中的JSON误解析为响应"
+  },
+  {
+    "test_id": "T22_AMBIGUOUS_ENTITY",
+    "category": "edge_cases",
+    "description": "测试歧义实体",
+    "input": "苹果发布了新产品，下周在北京开发布会",
+    "expected_entities": [
+      {"name": "苹果", "type": "organization"},
+      {"name": "北京", "type": "location"}
+    ],
+    "notes": "苹果应识别为公司而非水果"
+  }
+]

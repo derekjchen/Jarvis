@@ -1,0 +1,30 @@
+[
+  {
+    "test_id": "T15_MULTI_PART1",
+    "category": "cross_session",
+    "description": "跨会话测试 - 第一部分：提供信息",
+    "input": "我是王刚，负责AI研发",
+    "session_id": "cross_session_001",
+    "expected_entities": [
+      {"name": "王刚", "type": "person"},
+      {"name": "AI研发", "type": "project"}
+    ]
+  },
+  {
+    "test_id": "T16_MULTI_PART2",
+    "category": "cross_session",
+    "description": "跨会话测试 - 第二部分：补充信息",
+    "input": "我们团队有5个人",
+    "session_id": "cross_session_001",
+    "depends_on": "T15_MULTI_PART1"
+  },
+  {
+    "test_id": "T17_CROSS_SESSION",
+    "category": "cross_session",
+    "description": "跨会话测试 - 验证记忆",
+    "input": "我是谁？我负责什么？",
+    "session_id": "cross_session_002",
+    "expected_recall": ["王刚", "AI研发"],
+    "depends_on": ["T15_MULTI_PART1", "T16_MULTI_PART2"]
+  }
+]

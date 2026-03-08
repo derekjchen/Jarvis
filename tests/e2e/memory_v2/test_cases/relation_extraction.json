@@ -1,0 +1,44 @@
+[
+  {
+    "test_id": "T12_RELATION_PP",
+    "category": "relation_extraction",
+    "description": "测试人物-项目关系",
+    "input": "李明负责智慧城市项目，已经开发了两年",
+    "expected_entities": [
+      {"name": "李明", "type": "person"},
+      {"name": "智慧城市项目", "type": "project"}
+    ],
+    "expected_relations": [
+      {"source": "李明", "target": "智慧城市项目", "relation": "负责"}
+    ]
+  },
+  {
+    "test_id": "T13_RELATION_TP",
+    "category": "relation_extraction",
+    "description": "测试技术-项目关系",
+    "input": "电商平台项目使用Kafka做消息队列",
+    "expected_entities": [
+      {"name": "电商平台项目", "type": "project"},
+      {"name": "Kafka", "type": "technology"}
+    ],
+    "expected_relations": [
+      {"source": "电商平台项目", "target": "Kafka", "relation": "使用"}
+    ]
+  },
+  {
+    "test_id": "T14_RELATION_OL",
+    "category": "relation_extraction",
+    "description": "测试组织-地点关系",
+    "input": "腾讯总部在深圳，阿里巴巴在杭州",
+    "expected_entities": [
+      {"name": "腾讯", "type": "organization"},
+      {"name": "深圳", "type": "location"},
+      {"name": "阿里巴巴", "type": "organization"},
+      {"name": "杭州", "type": "location"}
+    ],
+    "expected_relations": [
+      {"source": "腾讯", "target": "深圳", "relation": "位于"},
+      {"source": "阿里巴巴", "target": "杭州", "relation": "位于"}
+    ]
+  }
+]
