@@ -132,71 +132,7 @@ class EntityExtractor:
             logger.error(f"[EntityExtractor._call_llm] Exception: {type(e).__name__}: {e}")
             raise
 
-    # =========================================================================
-    # WORKAROUND: _extract_entities_with_regex
-    # -------------------------------------------------------------------------
-    # Issue: LLM (glm-5) sometimes returns malformed JSON that cannot be parsed
-    # Error pattern: '\n    "name"' - suggests partial/broken JSON output
-    #
-    # This workaround uses regex to extract entity information directly from
-    # the LLM response when JSON parsing fails. It's less strict but more
-    # resilient to malformed output.
-    #
-    # TODO: Remove this workaround once LLM JSON output is stable
-    # Tracked in: Memory V2 entity extraction issues
-    # =========================================================================
-    def _extract_entities_with_regex(self, response: str) -> list[dict]:
-        """WORKAROUND: Extract entities using regex when JSON parsing fails.
-        
-        This is a fallback method that tries to extract entity-like structures
-        directly from the text using pattern matching. It handles cases where
-        the LLM returns malformed or partial JSON.
-        
-        Args:
-            response: The raw LLM response text
-            
-        Returns:
-            List of entity dictionaries extracted from the response
-        """
-        entities = []
-        
-        # Pattern 1: Match complete JSON objects with name field
-        # Handles: {"name": "xxx", "type": "yyy", ...}
-        pattern1 = r'\{\s*"name"\s*:\s*"([^"]+)"[^}]*\}'
-        matches1 = re.findall(pattern1, response, re.DOTALL)
-        
-        for name in matches1:
-            entity = {"name": name}
-            # Try to extract type
-            type_match = re.search(rf'\{{\s*"name"\s*:\s*"{re.escape(name)}"[^}}]*"type"\s*:\s*"([^"]+)"', response)
-            if type_match:
-                entity["type"] = type_match.group(1)
-            # Try to extract description
-            desc_match = re.search(rf'\{{\s*"name"\s*:\s*"{re.escape(name)}"[^}}]*"description"\s*:\s*"([^"]+)"', response)
-            if desc_match:
-                entity["description"] = desc_match.group(1)
-            entities.append(entity)
-        
-        if entities:
-            logger.info(f"[WORKAROUND] Extracted {len(entities)} entities using regex pattern 1")
-            return entities
-        
-        # Pattern 2: Match name-value pairs in any format
-        # Handles: name: "xxx" or name = "xxx" or "name": "xxx"
-        pattern2 = r'(?:name|"name")\s*[:=]\s*"([^"]+)"'
-        names = re.findall(pattern2, response, re.IGNORECASE)
-        
-        for name in names:
-            if name and len(name) > 1 and name not in [e.get("name") for e in entities]:
-                entities.append({"name": name, "type": "concept"})
-        
-        if entities:
-            logger.info(f"[WORKAROUND] Extracted {len(entities)} entities using regex pattern 2")
-        
-        return entities
-    # =========================================================================
-    # END WORKAROUND
-    # =========================================================================
+    
 
     def _try_repair_truncated_json(self, json_str: str) -> Optional[list]:
         """Try to repair and parse truncated JSON.
@@ -324,14 +260,6 @@ class EntityExtractor:
                             logger.info(f"Successfully repaired truncated JSON, got {len(data)} entities")
                     except Exception as repair_error:
                         logger.warning(f"Truncated JSON repair failed: {repair_error}")
-
-                # WORKAROUND: Use regex extraction as last resort
-                if data is None:
-                    logger.warning("[WORKAROUND] All JSON parsing methods failed, trying regex extraction")
-                    try:
-                        data = self._extract_entities_with_regex(response)
-                    except Exception as regex_error:
-                        logger.warning(f"Regex extraction also failed: {regex_error}")
 
             if data is None:
                 logger.warning(f"Failed to parse entity extraction response: {parse_error}")
