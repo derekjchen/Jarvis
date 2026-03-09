@@ -231,6 +231,13 @@ class MemoryManager(ReMeCopaw):
         try:
             entities = await self.entity_extractor.extract(text)
             logger.info(f"Extracted {len(entities)} entities from text")
+            
+            # Store entities to semantic_store for persistence
+            if self.semantic_store and entities:
+                for entity in entities:
+                    self.semantic_store.add_entity(entity)
+                logger.info(f"Stored {len(entities)} entities to semantic_store")
+            
             return entities
         except Exception as e:
             logger.error(f"Entity extraction failed: {e}")
