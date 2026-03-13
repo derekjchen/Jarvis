@@ -22,20 +22,10 @@ EXTRACTION_PROMPT = """请从以下文本中提取所有重要实体。
 文本：
 {text}
 
-请以 JSON 格式返回实体列表：
-[
-  {{
-    "name": "实体名称",
-    "type": "person|project|technology|date|concept|organization|location",
-    "description": "简短描述",
-    "attributes": {{"key": "value"}}
-  }}
-]
+请以 JSON 数组格式返回实体列表，每个实体包含 name, type, description, attributes 字段。
+type 可以是: person, project, technology, date, concept, organization, location
 
-注意：
-1. 只返回 JSON 数组，不要其他内容
-2. 只提取重要实体，不要提取普通词汇
-3. attributes 可包含额外信息（如职位、状态等）
+只返回 JSON 数组，不要其他内容。如果没有重要实体，返回空数组 []。
 """
 
 
