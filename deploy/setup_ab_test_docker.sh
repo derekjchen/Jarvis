@@ -26,31 +26,24 @@ mkdir -p $DEPLOY_DIR/logs
 mkdir -p $DEPLOY_DIR/tests/ab_test
 
 # Step 2: 克隆/更新代码
-echo -e "\n${YELLOW}Step 2: 更新代码仓库...${NC}"
-if [ -d "$DEPLOY_DIR/src" ]; then
-    cd $DEPLOY_DIR/src
-    git fetch origin
-    git checkout dev-ab-test-setup
-    git pull origin dev-ab-test-setup
-else
-    git clone -b dev-ab-test-setup https://github.com/derekjchen/Jarvis.git $DEPLOY_DIR/src
-fi
+echo -e "\n${YELLOW}Step 2: 代码仓库已克隆...${NC}"
+cd $DEPLOY_DIR
 
 # Step 3: 复制配置文件
 echo -e "\n${YELLOW}Step 3: 复制配置文件...${NC}"
 
 # OLD ECHO 配置
-cp $DEPLOY_DIR/src/deploy/old_echo/config.json $DEPLOY_DIR/config/old_echo/
+cp $DEPLOY_DIR/deploy/old_echo/config.json $DEPLOY_DIR/config/old_echo/
 cp /root/.copaw/providers.json $DEPLOY_DIR/config/old_echo/
 cp -r /root/.copaw.secret $DEPLOY_DIR/config/old_echo/
 
 # NEW ECHO 配置
-cp $DEPLOY_DIR/src/deploy/new_echo/config.json $DEPLOY_DIR/config/new_echo/
+cp $DEPLOY_DIR/deploy/new_echo/config.json $DEPLOY_DIR/config/new_echo/
 cp /root/.copaw/providers.json $DEPLOY_DIR/config/new_echo/
 cp -r /root/.copaw.secret $DEPLOY_DIR/config/new_echo/
 
 # Test Agent 配置
-cp $DEPLOY_DIR/src/deploy/new_echo/config.json $DEPLOY_DIR/config/test_agent/
+cp $DEPLOY_DIR/deploy/new_echo/config.json $DEPLOY_DIR/config/test_agent/
 cp /root/.copaw/providers.json $DEPLOY_DIR/config/test_agent/
 cp -r /root/.copaw.secret $DEPLOY_DIR/config/test_agent/
 
@@ -69,23 +62,22 @@ done
 
 # Step 5: 复制测试文件
 echo -e "\n${YELLOW}Step 5: 复制测试文件...${NC}"
-cp -r $DEPLOY_DIR/src/tests/ab_test/* $DEPLOY_DIR/tests/ab_test/
+cp -r $DEPLOY_DIR/tests/ab_test/* $DEPLOY_DIR/tests/ab_test/ 2>/dev/null || true
 
 # Step 6: 复制 Docker Compose 配置
 echo -e "\n${YELLOW}Step 6: 复制 Docker 配置...${NC}"
-cp $DEPLOY_DIR/src/deploy/docker-compose.yml $DEPLOY_DIR/
-cp $DEPLOY_DIR/src/deploy/Dockerfile $DEPLOY_DIR/
+cp $DEPLOY_DIR/deploy/docker-compose.yml $DEPLOY_DIR/
+cp $DEPLOY_DIR/deploy/Dockerfile $DEPLOY_DIR/ 2>/dev/null || true
 
 # Step 7: 构建 Docker 镜像
 echo -e "\n${YELLOW}Step 7: 构建 Docker 镜像...${NC}"
-cd $DEPLOY_DIR
 if [ -f "/root/copaw/deploy/Dockerfile" ]; then
     # 使用现有代码构建
     cd /root/copaw
     docker build -t copaw:latest -f deploy/Dockerfile .
 else
     echo -e "${YELLOW}使用 Jarvis 仓库的 Dockerfile...${NC}"
-    cd $DEPLOY_DIR/src
+    cd $DEPLOY_DIR
     docker build -t copaw:latest -f deploy/Dockerfile .
 fi
 
