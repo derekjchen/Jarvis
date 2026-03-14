@@ -246,6 +246,7 @@ class AgentRunner(Runner):
                 # Get config for memory manager
                 config = load_config()
                 max_input_length = config.agents.running.max_input_length
+                enable_v2 = config.agents.memory.enable_v2
 
                 # Create model and formatter
                 chat_model, formatter = create_model_and_formatter()
@@ -268,6 +269,7 @@ class AgentRunner(Runner):
                     toolkit=toolkit,
                     max_input_length=max_input_length,
                     memory_compact_ratio=MEMORY_COMPACT_RATIO,
+                    enable_v2=enable_v2,
                 )
             await self.memory_manager.start()
         except Exception as e:
