@@ -18,7 +18,7 @@ services:
     hostname: old-echo
     restart: unless-stopped
     ports:
-      - "8093:8088"
+      - "8093:8088"  # 宿主机8093 -> 容器8088
     networks:
       copaw-network:
         aliases:
@@ -47,7 +47,7 @@ services:
     hostname: new-echo
     restart: unless-stopped
     ports:
-      - "8088:8088"
+      - "8094:8088"  # 宿主机8094 -> 容器8088，避免和主Agent(8088)冲突
     networks:
       copaw-network:
         aliases:

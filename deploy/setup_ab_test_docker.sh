@@ -114,7 +114,7 @@ echo "OLD ECHO (Memory V2 禁用):"
 curl -s http://localhost:8093/health 2>/dev/null && echo -e " ${GREEN}✓ 运行正常${NC}" || echo -e " ${RED}✗ 未就绪${NC}"
 
 echo "NEW ECHO (Memory V2 启用):"
-curl -s http://localhost:8088/health 2>/dev/null && echo -e " ${GREEN}✓ 运行正常${NC}" || echo -e " ${RED}✗ 未就绪${NC}"
+curl -s http://localhost:8094/health 2>/dev/null && echo -e " ${GREEN}✓ 运行正常${NC}" || echo -e " ${RED}✗ 未就绪${NC}"
 
 # 显示网络信息
 echo ""
@@ -124,7 +124,8 @@ echo -e "${GREEN}========================================${NC}"
 echo ""
 echo -e "服务地址 (宿主机访问):"
 echo -e "  OLD ECHO: ${BLUE}http://localhost:8093${NC}"
-echo -e "  NEW ECHO: ${BLUE}http://localhost:8088${NC}"
+echo -e "  NEW ECHO: ${BLUE}http://localhost:8094${NC}"
+echo -e "  主 Agent: ${BLUE}http://localhost:8088${NC} (已运行)"
 echo ""
 echo -e "服务地址 (Docker Network 内部访问):"
 echo -e "  OLD ECHO: ${BLUE}http://old-echo:8088${NC}"
