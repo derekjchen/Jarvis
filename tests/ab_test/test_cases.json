@@ -1,0 +1,73 @@
+{
+  "test_cases": [
+    {
+      "id": "E1",
+      "name": "细节回忆 - Python版本",
+      "category": "detail_recall",
+      "preamble": "我最近在用 Python 3.11.4 做一个项目，遇到了一个 sqlite3 版本问题。",
+      "test_question": "我这个项目遇到个问题，sqlite3 版本太低了，你有啥建议？",
+      "expected_keywords": ["3.11.4", "3.11", "python"]
+    },
+    {
+      "id": "E2",
+      "name": "细节回忆 - 团队人数",
+      "category": "detail_recall",
+      "preamble": "我们团队有 7 个人，分别是张三、李四、王五、赵六、钱七、孙八、周九。",
+      "test_question": "我们团队有多少人？能说出所有名字吗？",
+      "expected_keywords": ["7", "张三", "李四", "王五", "赵六", "钱七", "孙八", "周九"]
+    },
+    {
+      "id": "E3",
+      "name": "人物指代 - 张伟",
+      "category": "entity_reference",
+      "preamble": "张伟是我同事，在阿里云做产品经理，我们经常一起讨论项目。",
+      "test_question": "张伟最近怎么样？",
+      "expected_keywords": ["同事", "阿里云", "产品经理"]
+    },
+    {
+      "id": "E4",
+      "name": "时序记忆 - 微服务决策",
+      "category": "temporal",
+      "preamble": "2024年3月15日，我们决定采用微服务架构。2024年6月20日，我们完成了第一个微服务的部署。",
+      "test_question": "我们是什么时候决定用微服务的？什么时候完成第一个部署的？",
+      "expected_keywords": ["3月15日", "6月20日", "2024"]
+    },
+    {
+      "id": "E5",
+      "name": "模糊关联 - 火星探测项目",
+      "category": "fuzzy_retrieval",
+      "preamble": "我们在做一个火星探测项目，预计明年完成，我是负责人。",
+      "test_question": "那个项目进度怎么样了？",
+      "expected_keywords": ["火星", "探测", "明年"]
+    },
+    {
+      "id": "E6",
+      "name": "主动关联 - 机器学习兴趣",
+      "category": "proactive_association",
+      "preamble": "我对机器学习和深度学习比较感兴趣，最近在研究 Transformer。",
+      "test_question": "最近有什么好的技术文章推荐吗？",
+      "expected_keywords": ["机器学习", "深度学习", "transformer"]
+    },
+    {
+      "id": "E7",
+      "name": "偏好记忆 - 不喜欢PHP",
+      "category": "preference",
+      "preamble": "我不喜欢 PHP，更喜欢 Python，PHP 的语法太乱了。",
+      "test_question": "我想做个 Web 后端，用什么技术好？",
+      "expected_keywords": ["python", "fastapi", "django", "flask"]
+    },
+    {
+      "id": "E8",
+      "name": "实体提取 - 技术栈",
+      "category": "entity_extraction",
+      "preamble": "我在阿里云做云计算相关工作，主要用 Kubernetes 和 Docker。",
+      "test_question": "我们之前讨论过什么技术吗？",
+      "expected_keywords": ["kubernetes", "docker", "阿里云", "云计算"]
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2026-03-14",
+    "description": "Memory V2 A/B 测试用例集"
+  }
+}
