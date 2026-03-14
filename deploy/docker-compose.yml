@@ -1,0 +1,90 @@
+# A/B 测试 Docker Compose 配置
+# 在 ECS 宿主机执行: docker-compose up -d
+
+version: '3.8'
+
+networks:
+  copaw-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+services:
+  # OLD ECHO - Memory V2 禁用 (对照组)
+  old-echo:
+    image: copaw:latest
+    container_name: copaw-old-echo
+    hostname: old-echo
+    restart: unless-stopped
+    ports:
+      - "8093:8088"
+    networks:
+      copaw-network:
+        aliases:
+          - old-echo
+    volumes:
+      - /root/ab_test_deploy/config/old_echo/config.json:/app/config/config.json
+      - /root/ab_test_deploy/config/old_echo/providers.json:/app/config/providers.json
+      - /root/ab_test_deploy/config/old_echo/.copaw.secret:/app/config/.copaw.secret
+      - /root/ab_test_deploy/data/old_echo/memory:/app/data/memory
+      - /root/ab_test_deploy/data/old_echo/file_store:/app/data/file_store
+      - /root/ab_test_deploy/data/old_echo/prompts:/app/prompts
+    environment:
+      - COPAW_DATA_DIR=/app/data
+      - COPAW_SECRET_DIR=/app/config/.copaw.secret
+      - MEMORY_ENABLE_V2=false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # NEW ECHO - Memory V2 启用 (实验组)
+  new-echo:
+    image: copaw:latest
+    container_name: copaw-new-echo
+    hostname: new-echo
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    networks:
+      copaw-network:
+        aliases:
+          - new-echo
+    volumes:
+      - /root/ab_test_deploy/config/new_echo/config.json:/app/config/config.json
+      - /root/ab_test_deploy/config/new_echo/providers.json:/app/config/providers.json
+      - /root/ab_test_deploy/config/new_echo/.copaw.secret:/app/config/.copaw.secret
+      - /root/ab_test_deploy/data/new_echo/memory:/app/data/memory
+      - /root/ab_test_deploy/data/new_echo/file_store:/app/data/file_store
+      - /root/ab_test_deploy/data/new_echo/prompts:/app/prompts
+    environment:
+      - COPAW_DATA_DIR=/app/data
+      - COPAW_SECRET_DIR=/app/config/.copaw.secret
+      - MEMORY_ENABLE_V2=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 可选: TestAgent 容器 (用于执行测试)
+  test-agent:
+    image: copaw:latest
+    container_name: copaw-test-agent
+    hostname: test-agent
+    restart: unless-stopped
+    ports:
+      - "8091:8088"
+    networks:
+      copaw-network:
+        aliases:
+          - test-agent
+    volumes:
+      - /root/ab_test_deploy/tests:/app/tests
+      - /root/ab_test_deploy/config/test_agent:/app/config
+    environment:
+      - TEST_TARGET_OLD=http://old-echo:8088
+      - TEST_TARGET_NEW=http://new-echo:8088
+    command: ["sleep", "infinity"]  # 保持运行，按需执行测试
