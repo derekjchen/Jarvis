@@ -1,212 +1,177 @@
 #!/bin/bash
 # A/B 测试环境部署脚本
-# 在宿主机上执行
+# 在 ECS 宿主机执行
 
 set -e
 
-# 配置
-NETWORK_NAME="ab-test-net"
-OLD_ECHO_NAME="old-echo"
-NEW_ECHO_NAME="new-echo"
-OLD_ECHO_PORT=8093
-NEW_ECHO_PORT=8094
-JARVIS_REPO="https://github.com/derekjchen/Jarvis.git"
-DEV_BRANCH="dev-ab-test-setup"
-
-# 颜色输出
+# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}  A/B 测试环境部署脚本${NC}"
+echo -e "${GREEN}========================================${NC}"
 
-# 检查 Docker
-check_docker() {
-    if ! command -v docker &> /dev/null; then
-        log_error "Docker 未安装"
-        exit 1
-    fi
-    log_info "Docker 已安装"
-}
+# 配置
+JARVIS_REPO="https://github.com/derekjchen/Jarvis.git"
+BRANCH="dev-ab-test-setup"
+DEPLOY_DIR="/root/ab_test_deploy"
+OLD_ECHO_PORT=8093
+NEW_ECHO_PORT=8088
 
-# 创建网络
-create_network() {
-    if docker network ls | grep -q "$NETWORK_NAME"; then
-        log_info "网络 $NETWORK_NAME 已存在"
-    else
-        docker network create "$NETWORK_NAME"
-        log_info "网络 $NETWORK_NAME 创建成功"
-    fi
-}
+# Step 1: 克隆代码
+echo -e "\n${YELLOW}Step 1: 克隆代码仓库...${NC}"
+if [ -d "$DEPLOY_DIR" ]; then
+    echo -e "${BLUE}目录已存在，更新代码...${NC}"
+    cd $DEPLOY_DIR
+    git fetch origin
+    git checkout $BRANCH
+    git pull origin $BRANCH
+else
+    echo -e "${BLUE}克隆仓库...${NC}"
+    git clone -b $BRANCH $JARVIS_REPO $DEPLOY_DIR
+    cd $DEPLOY_DIR
+fi
 
-# 部署 OLD ECHO (baseline, Memory V1)
-deploy_old_echo() {
-    log_info "部署 OLD ECHO (Memory V1 baseline)..."
-    
-    # 检查是否已存在
-    if docker ps -a | grep -q "$OLD_ECHO_NAME"; then
-        log_warn "容器 $OLD_ECHO_NAME 已存在，删除中..."
-        docker rm -f "$OLD_ECHO_NAME"
-    fi
-    
-    # 创建工作目录
-    mkdir -p /root/old_echo_working
-    
-    # 创建配置文件 (禁用 Memory V2)
-    cat > /root/old_echo_working/config.json << 'EOF'
+# Step 2: 创建配置目录
+echo -e "\n${YELLOW}Step 2: 创建配置目录...${NC}"
+mkdir -p $DEPLOY_DIR/config/old_echo
+mkdir -p $DEPLOY_DIR/config/new_echo
+mkdir -p $DEPLOY_DIR/data/old_echo/memory
+mkdir -p $DEPLOY_DIR/data/old_echo/file_store
+mkdir -p $DEPLOY_DIR/data/new_echo/memory
+mkdir -p $DEPLOY_DIR/data/new_echo/file_store
+
+# Step 3: 复制配置文件
+echo -e "\n${YELLOW}Step 3: 复制配置文件...${NC}"
+
+# OLD ECHO 配置
+cat > $DEPLOY_DIR/config/old_echo/config.json << 'CONFIG_EOF'
 {
-  "agents": {
-    "memory": {
-      "enable_v2": false
+  "channels": {"console": {"enabled": true}},
+  "mcp": {"clients": {}},
+  "tools": {
+    "builtin_tools": {
+      "execute_shell_command": {"enabled": true},
+      "read_file": {"enabled": true},
+      "write_file": {"enabled": true},
+      "edit_file": {"enabled": true},
+      "browser_use": {"enabled": true},
+      "desktop_screenshot": {"enabled": true},
+      "send_file_to_user": {"enabled": true},
+      "get_current_time": {"enabled": true},
+      "get_token_usage": {"enabled": true},
+      "memory_search": {"enabled": true}
     }
-  }
+  },
+  "last_api": {"host": "0.0.0.0", "port": 8093},
+  "agents": {
+    "defaults": {"heartbeat": {"enabled": false}},
+    "running": {
+      "max_iters": 50,
+      "max_input_length": 131072,
+      "memory_compact_ratio": 0.75,
+      "memory_reserve_ratio": 0.1
+    },
+    "llm_routing": {"enabled": false},
+    "language": "zh"
+  },
+  "security": {"tool_guard": {"enabled": true}},
+  "show_tool_details": true,
+  "memory": {"enable_v2": false}
 }
-EOF
-    
-    # 获取当前镜像
-    IMAGE=$(docker inspect copaw-new --format '{{.Config.Image}}' 2>/dev/null || echo "agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/copaw:latest")
-    log_info "使用镜像: $IMAGE"
-    
-    # 启动容器
-    docker run -d \
-        --name "$OLD_ECHO_NAME" \
-        --network "$NETWORK_NAME" \
-        -p $OLD_ECHO_PORT:8088 \
-        -v /root/old_echo_working:/app/working \
-        -v /root/copaw_old_echo_secret:/app/working.secret \
-        --memory="1g" \
-        "$IMAGE"
-    
-    log_info "OLD ECHO 启动成功，端口: $OLD_ECHO_PORT"
-}
+CONFIG_EOF
 
-# 部署 NEW ECHO (experimental, Memory V2)
-deploy_new_echo() {
-    log_info "部署 NEW ECHO (Memory V2 experimental)..."
-    
-    # 检查是否已存在
-    if docker ps -a | grep -q "$NEW_ECHO_NAME"; then
-        log_warn "容器 $NEW_ECHO_NAME 已存在，删除中..."
-        docker rm -f "$NEW_ECHO_NAME"
-    fi
-    
-    # 清理旧的工作目录（全新部署）
-    rm -rf /root/new_echo_working
-    mkdir -p /root/new_echo_working
-    
-    # 创建配置文件 (启用 Memory V2)
-    cat > /root/new_echo_working/config.json << 'EOF'
+# NEW ECHO 配置
+cat > $DEPLOY_DIR/config/new_echo/config.json << 'CONFIG_EOF'
 {
-  "agents": {
-    "memory": {
-      "enable_v2": true
+  "channels": {"console": {"enabled": true}},
+  "mcp": {"clients": {}},
+  "tools": {
+    "builtin_tools": {
+      "execute_shell_command": {"enabled": true},
+      "read_file": {"enabled": true},
+      "write_file": {"enabled": true},
+      "edit_file": {"enabled": true},
+      "browser_use": {"enabled": true},
+      "desktop_screenshot": {"enabled": true},
+      "send_file_to_user": {"enabled": true},
+      "get_current_time": {"enabled": true},
+      "get_token_usage": {"enabled": true},
+      "memory_search": {"enabled": true}
     }
-  }
+  },
+  "last_api": {"host": "0.0.0.0", "port": 8088},
+  "agents": {
+    "defaults": {"heartbeat": {"enabled": false}},
+    "running": {
+      "max_iters": 50,
+      "max_input_length": 131072,
+      "memory_compact_ratio": 0.75,
+      "memory_reserve_ratio": 0.1
+    },
+    "llm_routing": {"enabled": false},
+    "language": "zh"
+  },
+  "security": {"tool_guard": {"enabled": true}},
+  "show_tool_details": true,
+  "memory": {"enable_v2": true}
 }
-EOF
-    
-    # 克隆或更新 Jarvis 仓库
-    if [ -d "/root/copaw-jarvis-dev" ]; then
-        log_info "更新 Jarvis 仓库..."
-        cd /root/copaw-jarvis-dev
-        git fetch origin
-        git checkout "$DEV_BRANCH"
-        git pull origin "$DEV_BRANCH"
-    else
-        log_info "克隆 Jarvis 仓库..."
-        cd /root
-        git clone -b "$DEV_BRANCH" "$JARVIS_REPO" copaw-jarvis-dev
-        cd copaw-jarvis-dev
+CONFIG_EOF
+
+# 复制 providers.json
+echo -e "${BLUE}复制 providers.json...${NC}"
+cp /root/.copaw/providers.json $DEPLOY_DIR/config/old_echo/
+cp /root/.copaw/providers.json $DEPLOY_DIR/config/new_echo/
+
+# 复制 secret 配置
+echo -e "${BLUE}复制密钥配置...${NC}"
+cp -r /root/.copaw.secret $DEPLOY_DIR/config/old_echo/
+cp -r /root/.copaw.secret $DEPLOY_DIR/config/new_echo/
+
+# Step 4: 复制数据文件
+echo -e "\n${YELLOW}Step 4: 复制数据文件...${NC}"
+
+# 复制记忆文件
+cp -r /root/.copaw/memory/* $DEPLOY_DIR/data/old_echo/memory/
+cp -r /root/.copaw/memory/* $DEPLOY_DIR/data/new_echo/memory/
+
+# 复制向量数据库
+cp -r /root/.copaw/file_store/* $DEPLOY_DIR/data/old_echo/file_store/
+cp -r /root/.copaw/file_store/* $DEPLOY_DIR/data/new_echo/file_store/
+
+# Step 5: 复制系统提示文件
+echo -e "\n${YELLOW}Step 5: 复制系统提示文件...${NC}"
+mkdir -p $DEPLOY_DIR/data/old_echo/prompts
+mkdir -p $DEPLOY_DIR/data/new_echo/prompts
+
+for file in AGENTS.md SOUL.md PROFILE.md MEMORY.md; do
+    if [ -f "/root/.copaw/$file" ]; then
+        cp /root/.copaw/$file $DEPLOY_DIR/data/old_echo/prompts/
+        cp /root/.copaw/$file $DEPLOY_DIR/data/new_echo/prompts/
     fi
-    
-    # 构建镜像（包含最新代码）
-    log_info "构建 Docker 镜像..."
-    docker build -t copaw:dev-latest .
-    
-    # 启动容器
-    docker run -d \
-        --name "$NEW_ECHO_NAME" \
-        --network "$NETWORK_NAME" \
-        -p $NEW_ECHO_PORT:8088 \
-        -v /root/new_echo_working:/app/working \
-        -v /root/copaw_new_echo_secret:/app/working.secret \
-        --memory="1g" \
-        copaw:dev-latest
-    
-    log_info "NEW ECHO 启动成功，端口: $NEW_ECHO_PORT"
-}
+done
 
-# 验证部署
-verify_deployment() {
-    log_info "验证部署..."
-    
-    sleep 10  # 等待服务启动
-    
-    # 检查 OLD ECHO
-    if curl -s -m 5 "http://localhost:$OLD_ECHO_PORT/api/health" > /dev/null 2>&1; then
-        log_info "OLD ECHO 健康检查通过 ✅"
-    else
-        log_warn "OLD ECHO 健康检查失败，可能需要等待更长时间"
-    fi
-    
-    # 检查 NEW ECHO
-    if curl -s -m 5 "http://localhost:$NEW_ECHO_PORT/api/health" > /dev/null 2>&1; then
-        log_info "NEW ECHO 健康检查通过 ✅"
-    else
-        log_warn "NEW ECHO 健康检查失败，可能需要等待更长时间"
-    fi
-}
-
-# 显示使用说明
-show_usage() {
-    echo ""
-    echo "========================================"
-    echo "A/B 测试环境已就绪"
-    echo "========================================"
-    echo ""
-    echo "容器信息:"
-    echo "  OLD ECHO (V1): localhost:$OLD_ECHO_PORT"
-    echo "  NEW ECHO (V2): localhost:$NEW_ECHO_PORT"
-    echo ""
-    echo "Docker 网络内访问:"
-    echo "  OLD ECHO: http://$OLD_ECHO_NAME:8088"
-    echo "  NEW ECHO: http://$NEW_ECHO_NAME:8088"
-    echo ""
-    echo "运行测试:"
-    echo "  cd /root/copaw-jarvis-dev/tests/ab_test"
-    echo "  python run_ab_test.py --old http://localhost:$OLD_ECHO_PORT --new http://localhost:$NEW_ECHO_PORT"
-    echo ""
-}
-
-# 主函数
-main() {
-    log_info "开始部署 A/B 测试环境..."
-    
-    check_docker
-    create_network
-    deploy_old_echo
-    deploy_new_echo
-    verify_deployment
-    show_usage
-    
-    log_info "部署完成！"
-}
-
-# 解析参数
-case "$1" in
-    old)
-        deploy_old_echo
-        ;;
-    new)
-        deploy_new_echo
-        ;;
-    verify)
-        verify_deployment
-        ;;
-    all|*)
-        main
-        ;;
-esac
+# Step 6: 显示部署信息
+echo -e "\n${GREEN}========================================${NC}"
+echo -e "${GREEN}  部署准备完成！${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo ""
+echo -e "部署目录: ${YELLOW}$DEPLOY_DIR${NC}"
+echo ""
+echo -e "目录结构:"
+echo "  config/"
+echo "    old_echo/   (Memory V2 禁用, 端口 $OLD_ECHO_PORT)"
+echo "    new_echo/   (Memory V2 启用, 端口 $NEW_ECHO_PORT)"
+echo "  data/"
+echo "    old_echo/memory/"
+echo "    old_echo/file_store/"
+echo "    new_echo/memory/"
+echo "    new_echo/file_store/"
+echo ""
+echo -e "${YELLOW}下一步: 运行启动脚本${NC}"
+echo "  cd $DEPLOY_DIR/deploy"
+echo "  ./start_ab_test.sh"

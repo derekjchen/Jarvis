@@ -1,0 +1,120 @@
+{
+  "channels": {
+    "console": {
+      "enabled": true,
+      "bot_prefix": "",
+      "filter_tool_messages": false,
+      "filter_thinking": false,
+      "dm_policy": "open",
+      "group_policy": "open",
+      "allow_from": [],
+      "deny_message": "",
+      "require_mention": false
+    }
+  },
+  "mcp": {
+    "clients": {}
+  },
+  "tools": {
+    "builtin_tools": {
+      "execute_shell_command": {
+        "name": "execute_shell_command",
+        "enabled": true,
+        "description": "Execute shell commands"
+      },
+      "read_file": {
+        "name": "read_file",
+        "enabled": true,
+        "description": "Read file contents"
+      },
+      "write_file": {
+        "name": "write_file",
+        "enabled": true,
+        "description": "Write content to file"
+      },
+      "edit_file": {
+        "name": "edit_file",
+        "enabled": true,
+        "description": "Edit file using find-and-replace"
+      },
+      "browser_use": {
+        "name": "browser_use",
+        "enabled": true,
+        "description": "Browser automation"
+      },
+      "desktop_screenshot": {
+        "name": "desktop_screenshot",
+        "enabled": true,
+        "description": "Capture desktop screenshots"
+      },
+      "send_file_to_user": {
+        "name": "send_file_to_user",
+        "enabled": true,
+        "description": "Send files to user"
+      },
+      "get_current_time": {
+        "name": "get_current_time",
+        "enabled": true,
+        "description": "Get current date and time"
+      },
+      "get_token_usage": {
+        "name": "get_token_usage",
+        "enabled": true,
+        "description": "Get llm token usage"
+      },
+      "memory_search": {
+        "name": "memory_search",
+        "enabled": true,
+        "description": "Search memory files"
+      }
+    }
+  },
+  "last_api": {
+    "host": "0.0.0.0",
+    "port": 8088
+  },
+  "agents": {
+    "defaults": {
+      "heartbeat": {
+        "enabled": false
+      }
+    },
+    "running": {
+      "max_iters": 50,
+      "max_input_length": 131072,
+      "memory_compact_ratio": 0.75,
+      "memory_reserve_ratio": 0.1,
+      "enable_tool_result_compact": false,
+      "tool_result_compact_keep_n": 5
+    },
+    "llm_routing": {
+      "enabled": false,
+      "mode": "local_first",
+      "local": {
+        "provider_id": "",
+        "model": ""
+      },
+      "cloud": null
+    },
+    "language": "zh",
+    "installed_md_files_language": "zh",
+    "system_prompt_files": [
+      "AGENTS.md",
+      "SOUL.md",
+      "PROFILE.md"
+    ]
+  },
+  "security": {
+    "tool_guard": {
+      "enabled": true,
+      "guarded_tools": null,
+      "denied_tools": [],
+      "custom_rules": [],
+      "disabled_rules": []
+    }
+  },
+  "show_tool_details": true,
+  "memory": {
+    "enable_v2": true
+  }
+}
