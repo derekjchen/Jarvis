@@ -124,9 +124,24 @@ class SemanticStore:
     # ==================== Entity Operations ====================
     
     def add_entity(self, entity: Entity) -> Entity:
-        """Add or update an entity."""
-        if entity.id in self._entities:
+        """Add or update an entity.
+        
+        If an entity with the same name exists, updates it instead of creating duplicate.
+        """
+        # 首先检查是否有同名实体
+        existing_by_name = self.get_entity_by_name(entity.name)
+        if existing_by_name:
             # 更新现有实体
+            existing_by_name.update_mention()
+            if entity.description and entity.description != existing_by_name.description:
+                existing_by_name.description = entity.description
+            if entity.attributes:
+                existing_by_name.attributes.update(entity.attributes)
+            self._save_entities()
+            return existing_by_name
+        
+        # 检查 ID 是否存在
+        if entity.id in self._entities:
             existing = self._entities[entity.id]
             existing.update_mention()
             if entity.description and entity.description != existing.description:
@@ -337,4 +352,5 @@ class SemanticStore:
             "relation_types": {t.value: sum(1 for r in self._relations.values() if r.relation_type == t) for t in RelationType},
             "scene_types": {t.value: sum(1 for s in self._scenes.values() if s.scene_type == t) for t in SceneType},
         }
+
 

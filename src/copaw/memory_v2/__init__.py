@@ -5,6 +5,7 @@ Milestone 2.0 Components:
 - Scene classification
 - Relation extraction
 - Enhanced storage
+- Bridge for Jarvis integration
 """
 
 from .models import (
@@ -23,6 +24,7 @@ from .semantic_analyzer import SemanticAnalyzer
 from .memory_synthesizer import MemorySynthesizer
 from .scene_classifier import SceneClassifier, classify_scene
 from .relation_extractor import RelationExtractor, extract_relations
+from .bridge import MemoryV2Bridge
 
 __all__ = [
     # Models
@@ -46,5 +48,7 @@ __all__ = [
     # Scene
     "SceneClassifier",
     "classify_scene",
+    # Bridge
+    "MemoryV2Bridge",
 ]
 
