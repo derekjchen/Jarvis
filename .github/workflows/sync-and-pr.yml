@@ -1,4 +1,7 @@
-name: Sync and Create PR
+name: Sync to Fork
+
+# 暂不推送到官方仓库 - 用户指示 2026-03-22
+# 仅同步到 Fork (derekjchen/CoPaw)
 
 on:
   push:
@@ -33,37 +36,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  create-pr:
-    needs: sync
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Create Pull Request
-        uses: repo-sync/pull-request@v2
-        with:
-          source_branch: "feature/memory-system-m4"
-          destination_branch: "main"
-          pr_title: "feat(memory): Memory System M2.1-M4.0 Integration"
-          pr_body: |
-            ## Memory System Integration
-            
-            This PR integrates the Memory System M2.1-M4.0 milestones:
-            
-            ### Features
-            - **M2.1**: Critical Information Protection (Allergies, Taboos)
-            - **M3.0**: Preference Evolution & Event Tracking
-            - **M3.5**: Dynamic Memory Injection
-            - **M4.0**: LLM Semantic Extraction
-            
-            ### Files Changed
-            - `src/copaw/agents/memory/unified/` - Core memory system
-            - `src/copaw/agents/llm_agent.py` - ReactAgent integration
-            - `docs/memory_system/` - Documentation
-            
-            ### Testing
-            - [x] Unit tests passed
-            - [x] Integration tests passed
-            - [x] Manual testing completed
-            
-          pr_assignee: "derekjchen"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  # 暂时禁用 - 不创建 PR 到官方仓库
+  # create-pr:
+  #   needs: sync
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'workflow_dispatch'
+  #   steps:
+  #     - name: Create Pull Request
+  #       uses: repo-sync/pull-request@v2
+  #       with:
+  #         source_branch: "feature/memory-system-m4"
+  #         destination_branch: "main"
+  #         pr_title: "feat(memory): Memory System M2.1-M4.0 Integration"
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
