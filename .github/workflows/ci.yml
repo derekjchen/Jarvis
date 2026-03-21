@@ -1,18 +1,33 @@
 name: CI/CD Pipeline
 
-# 只在 jarvis 仓库运行 (derekjchen/Jarvis)
-# 不推送到官方仓库 (agentscope-ai/CoPaw)
+# 工作流程：
+# 1. 推送代码 → 自动测试
+# 2. main 分支 → 构建 Docker 镜像推送到阿里云 ACR
+# 3. 手动触发 → 部署到 ECS
 
 on:
   push:
     branches: [ main, feature/* ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to ECS after build'
+        required: false
+        default: 'false'
+        type: boolean
 
 env:
   PYTHON_VERSION: '3.11'
+  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+  ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}
+  IMAGE_NAME: jarvis
 
 jobs:
+  # ===========================================
+  # 测试阶段
+  # ===========================================
   test:
     runs-on: ubuntu-latest
     steps:
@@ -29,12 +44,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]" || pip install pytest pytest-asyncio pydantic loguru httpx
+          pip install -r requirements.txt || echo "No requirements.txt"
 
       - name: Run tests
         run: |
           pytest src/copaw/agents/memory/unified/tests/ -v || echo "Tests completed"
         continue-on-error: true
 
+  # ===========================================
+  # 构建并推送镜像
+  # ===========================================
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -46,7 +65,68 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Login to Aliyun Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest
+            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image pushed successfully
         run: |
-          docker build -t jarvis-copaw:${{ github.sha }} .
-        continue-on-error: true
+          echo "✅ Image pushed to:"
+          echo "   ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest"
+
+  # ===========================================
+  # 部署到 ECS (手动触发)
+  # ===========================================
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'
+    steps:
+      - name: Deploy to ECS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            echo "🚀 Deploying Jarvis..."
+            
+            # 登录阿里云 ACR
+            docker login --username=${{ secrets.ACR_USERNAME }} --password=${{ secrets.ACR_PASSWORD }} ${{ secrets.ACR_REGISTRY }}
+            
+            # 拉取最新镜像
+            docker pull ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest
+            
+            # 停止并删除旧容器
+            docker stop jarvis || true
+            docker rm jarvis || true
+            
+            # 启动新容器
+            docker run -d \
+              --name jarvis \
+              -p 18794:8088 \
+              -e ENABLE_UNIFIED_MEMORY=true \
+              -e ENABLE_LLM_EXTRACTION=true \
+              ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest
+            
+            echo "✅ Deployment completed!"
+
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.ECS_HOST }}:18794/api/version || echo "⚠️ Health check failed, please check container logs"
+          echo "Deployment finished at $(date)"
