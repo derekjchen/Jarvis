@@ -1,0 +1,39 @@
+name: Deploy to ECS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            cd /workspace/copaw
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/copaw:latest || echo "Pull failed, using existing image"
+            docker restart super-mem-copaw || echo "Container not found"
+            echo "Deployment completed at $(date)"
+
+  health-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health Check
+        run: |
+          curl -f ${{ secrets.ECS_HOST }}:18794/api/version || exit 1
+          echo "Health check passed!"

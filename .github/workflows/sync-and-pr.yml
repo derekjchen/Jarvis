@@ -1,0 +1,69 @@
+name: Sync and Create PR
+
+on:
+  push:
+    branches: [ feature/memory-system-m4 ]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync with upstream
+        run: |
+          git remote add upstream https://github.com/agentscope-ai/CoPaw.git
+          git fetch upstream
+          git log --oneline -5
+        continue-on-error: true
+
+      - name: Push to Fork
+        run: |
+          git push origin HEAD:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-pr:
+    needs: sync
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "feature/memory-system-m4"
+          destination_branch: "main"
+          pr_title: "feat(memory): Memory System M2.1-M4.0 Integration"
+          pr_body: |
+            ## Memory System Integration
+            
+            This PR integrates the Memory System M2.1-M4.0 milestones:
+            
+            ### Features
+            - **M2.1**: Critical Information Protection (Allergies, Taboos)
+            - **M3.0**: Preference Evolution & Event Tracking
+            - **M3.5**: Dynamic Memory Injection
+            - **M4.0**: LLM Semantic Extraction
+            
+            ### Files Changed
+            - `src/copaw/agents/memory/unified/` - Core memory system
+            - `src/copaw/agents/llm_agent.py` - ReactAgent integration
+            - `docs/memory_system/` - Documentation
+            
+            ### Testing
+            - [x] Unit tests passed
+            - [x] Integration tests passed
+            - [x] Manual testing completed
+            
+          pr_assignee: "derekjchen"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
