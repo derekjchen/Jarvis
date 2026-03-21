@@ -252,3 +252,23 @@ class Entity(BaseModel):
 ## 更新日志
 
 - 2026-03-21: 初始设计文档
+- 2026-03-21 23:10: **M5.0 核心实现完成** ✅
+
+## 实现状态
+
+| 组件 | 状态 | 文件 |
+|------|------|------|
+| EvolutionConfig | ✅ 完成 | `evolution.py` |
+| EvolutionReport | ✅ 完成 | `evolution.py` |
+| MemoryQualityEvaluator | ✅ 完成 | `evolution.py` |
+| MemoryForgetter | ✅ 完成 | `evolution.py` |
+| MemoryIntegrator | ✅ 完成 | `evolution.py` |
+| MemoryEvolver | ✅ 完成 | `evolution.py` |
+| 单元测试 | ✅ 通过 | `tests/test_evolution.py` |
+
+## 后续工作
+
+- [ ] 集成到 MemoryIntegration
+- [ ] 定时任务配置
+- [ ] 性能优化
+- [ ] 大规模测试
