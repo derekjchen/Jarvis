@@ -170,23 +170,24 @@ sm-co 在处理多任务指令时的行为：
 
 ---
 
-## 重要约束 ⚠️
+## ⚠️ 仓库工作约束 (重要)
 
-### 暂不推送到官方仓库 (2026-03-22)
+### 只在 jarvis 仓库工作
 
-**用户明确指示**：暂时不要推送到 `agentscope-ai/CoPaw` 官方仓库。
+**用户明确指示**：所有代码改动只推送到 `derekjchen/Jarvis`，不推送到官方仓库。
 
-**当前状态**：
-- ✅ 可以推送到 Fork (`derekjchen/CoPaw`)
-- ❌ 不推送 PR 到官方仓库
-- ❌ 不合并到官方 main 分支
+| Remote | 仓库 | 用途 |
+|--------|------|------|
+| `jarvis` | `derekjchen/Jarvis` | ✅ **我们的工作仓库**，所有改动推到这里 |
+| `origin` | `agentscope-ai/CoPaw` | ❌ 官方仓库，只读同步，不推送 |
 
-**原因**：用户未说明，需遵守
-
-**CI/CD 配置已完成**：
-- `ci.yml` - 测试和构建
-- `deploy.yml` - 部署到 ECS
-- `sync-and-pr.yml` - 同步和创建 PR（暂不使用）
+**工作流程**：
+```bash
+git add .
+git commit -m "xxx"
+git push jarvis feature/memory-system-m4  # ✅ 推送到 jarvis
+# git push origin ...                       # ❌ 不推送到官方
+```
 
 ---
 
