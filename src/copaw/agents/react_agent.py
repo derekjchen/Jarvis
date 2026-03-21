@@ -50,6 +50,7 @@ from ..constant import (
     WORKING_DIR,
 )
 from ..agents.memory import MemoryManager
+from ..agents.memory.unified.integration import MemoryIntegration
 
 if TYPE_CHECKING:
     from ..config.config import AgentProfileConfig
@@ -151,6 +152,9 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
             memory_manager,
             namesake_strategy,
         )
+
+        # Setup unified memory integration (M2.1-M4.0)
+        self._setup_memory_integration()
 
         # Setup command handler
         self.command_handler = CommandHandler(
@@ -283,6 +287,11 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
         logger.debug("System prompt:\n%s", sys_prompt)
         if self._env_context is not None:
             sys_prompt = sys_prompt + "\n\n" + self._env_context
+        
+        # Inject memory entities if available (M2.1-M4.0)
+        if self.memory_integration:
+            sys_prompt = self.memory_integration.inject_to_prompt_sync(sys_prompt)
+        
         return sys_prompt
 
     def _setup_memory_manager(
@@ -319,6 +328,46 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
                 namesake_strategy=namesake_strategy,
             )
             logger.debug("Registered memory_search tool")
+
+    def _setup_memory_integration(self) -> None:
+        """Setup unified memory integration.
+        
+        This initializes the MemoryIntegration which combines:
+        - M2.1: KeyInfo extraction (safety-critical)
+        - M3.0: Preference evolution and event tracking
+        - M3.5: Unified storage and dynamic injection
+        - M4.0: LLM-based extraction (optional)
+        """
+        try:
+            enable_unified = os.getenv("ENABLE_UNIFIED_MEMORY", "true").lower() != "false"
+            
+            if not enable_unified:
+                logger.debug("Unified memory integration disabled by env var")
+                self.memory_integration = None
+                return
+            
+            llm_model = None
+            enable_llm = os.getenv("ENABLE_LLM_EXTRACTION", "true").lower() != "false"
+            
+            if enable_llm:
+                try:
+                    from ..providers import ProviderManager
+                    pm = ProviderManager()
+                    llm_model = pm.get_active_chat_model()
+                    logger.debug(f"LLM model for extraction: {getattr(llm_model, 'model_name', 'unknown')}")
+                except Exception as e:
+                    logger.warning(f"Failed to get LLM model: {e}")
+            
+            working_dir = self._workspace_dir if self._workspace_dir else WORKING_DIR
+            self.memory_integration = MemoryIntegration(
+                working_dir=str(working_dir),
+                llm_model=llm_model,
+                enable_llm=enable_llm and llm_model is not None,
+            )
+            logger.info("Unified memory integration enabled")
+        except Exception as e:
+            logger.warning(f"Failed to setup memory integration: {e}")
+            self.memory_integration = None
 
     def _register_hooks(self) -> None:
         """Register pre-reasoning and pre-acting hooks."""
@@ -805,6 +854,18 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
         # Process file and media blocks in messages
         if msg is not None:
             await process_file_and_media_blocks_in_message(msg)
+
+        # Extract and store memory entities from user message (M2.1-M4.0)
+        if self.memory_integration and msg is not None:
+            try:
+                last_msg = msg[-1] if isinstance(msg, list) else msg
+                if isinstance(last_msg, Msg):
+                    user_text = last_msg.get_text_content()
+                    if user_text:
+                        session_id = self._request_context.get("session_id", "") if self._request_context else ""
+                        await self.memory_integration.process_message(user_text, session_id)
+            except Exception as e:
+                logger.warning(f"Failed to process message for memory: {e}")
 
         # Check if message is a system command
         last_msg = msg[-1] if isinstance(msg, list) else msg

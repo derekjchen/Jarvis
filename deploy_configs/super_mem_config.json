@@ -1,0 +1,30 @@
+{
+  "channels": {
+    "dingtalk": {"enabled": false, "bot_prefix": "", "dm_policy": "open", "group_policy": "open"},
+    "console": {"enabled": true, "bot_prefix": "", "dm_policy": "open", "group_policy": "open"}
+  },
+  "mcp": {"clients": {}},
+  "tools": {
+    "builtin_tools": {
+      "execute_shell_command": {"name": "execute_shell_command", "enabled": true},
+      "read_file": {"name": "read_file", "enabled": true},
+      "write_file": {"name": "write_file", "enabled": true},
+      "edit_file": {"name": "edit_file", "enabled": true},
+      "browser_use": {"name": "browser_use", "enabled": true},
+      "desktop_screenshot": {"name": "desktop_screenshot", "enabled": true},
+      "send_file_to_user": {"name": "send_file_to_user", "enabled": true},
+      "get_current_time": {"name": "get_current_time", "enabled": true},
+      "get_token_usage": {"name": "get_token_usage", "enabled": true}
+    }
+  },
+  "last_api": {"host": "0.0.0.0", "port": 8088},
+  "agents": {
+    "defaults": {"heartbeat": {"enabled": true, "every": "1h", "target": "main"}},
+    "running": {"max_iters": 50, "max_input_length": 131072},
+    "llm_routing": {"enabled": false, "mode": "local_first", "local": {"provider_id": "", "model": ""}},
+    "language": "zh",
+    "system_prompt_files": ["AGENTS.md", "SOUL.md", "PROFILE.md"]
+  },
+  "security": {"tool_guard": {"enabled": true}},
+  "show_tool_details": true
+}
