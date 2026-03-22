@@ -20,9 +20,6 @@ on:
 
 env:
   PYTHON_VERSION: '3.11'
-  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
-  ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}
-  IMAGE_NAME: jarvis
 
 jobs:
   # ===========================================
@@ -78,15 +75,15 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest
-            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:${{ github.sha }}
+            ${{ secrets.ACR_REGISTRY }}/derek_agent/jarvis:latest
+            ${{ secrets.ACR_REGISTRY }}/derek_agent/jarvis:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Image pushed successfully
         run: |
           echo "✅ Image pushed to:"
-          echo "   ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest"
+          echo "   ${{ secrets.ACR_REGISTRY }}/derek_agent/jarvis:latest"
 
   # ===========================================
   # 部署到 ECS (手动触发)
@@ -105,11 +102,11 @@ jobs:
           script: |
             echo "🚀 Deploying Jarvis..."
             
-            # 登录阿里云 ACR
-            docker login --username=${{ secrets.ACR_USERNAME }} --password=${{ secrets.ACR_PASSWORD }} ${{ secrets.ACR_REGISTRY }}
+            # 登录阿里云 ACR (使用 VPC 内网地址)
+            docker login --username=${{ secrets.ACR_USERNAME }} --password=${{ secrets.ACR_PASSWORD }} ${{ secrets.ACR_REGISTRY_VPC }}
             
-            # 拉取最新镜像
-            docker pull ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest
+            # 拉取最新镜像 (使用 VPC 内网)
+            docker pull ${{ secrets.ACR_REGISTRY_VPC }}/derek_agent/jarvis:latest
             
             # 停止并删除旧容器
             docker stop jarvis || true
@@ -121,7 +118,7 @@ jobs:
               -p 18794:8088 \
               -e ENABLE_UNIFIED_MEMORY=true \
               -e ENABLE_LLM_EXTRACTION=true \
-              ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/jarvis:latest
+              ${{ secrets.ACR_REGISTRY_VPC }}/derek_agent/jarvis:latest
             
             echo "✅ Deployment completed!"
 
