@@ -54,6 +54,7 @@ from ..agents.memory import MemoryManager
 from ..config import load_config
 from ..constant import (
     MEMORY_COMPACT_RATIO,
+    MAX_ITERS,
     WORKING_DIR,
 )
 
@@ -90,7 +91,7 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
         mcp_clients: Optional[List[Any]] = None,
         memory_manager: MemoryManager | None = None,
         request_context: Optional[dict[str, str]] = None,
-        max_iters: int = 50,
+        max_iters: int = MAX_ITERS,
         max_input_length: int = 128 * 1024,  # 128K = 131072 tokens
         namesake_strategy: NamesakeStrategy = "skip",
     ):
