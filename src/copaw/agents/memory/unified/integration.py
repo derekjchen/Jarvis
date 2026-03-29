@@ -7,6 +7,7 @@ integrating all milestones:
 - M3.0: Preference evolution and event tracking
 - M3.5: Unified storage and dynamic injection
 - M4.0: LLM-based extraction
+- M5.0: Memory evolution (quality evaluation, forgetting, integration)
 
 Usage:
     integration = MemoryIntegration(working_dir)
@@ -16,6 +17,9 @@ Usage:
     
     # Inject relevant entities into prompt
     enhanced_prompt = integration.inject_to_prompt_sync(original_prompt)
+    
+    # Run memory evolution (M5.0)
+    report = await integration.evolve()
 """
 import asyncio
 import logging
@@ -29,6 +33,7 @@ from .retriever import EntityRetriever
 from .injector import DynamicInjector
 from .extractor import UnifiedExtractor, extract_entities
 from .llm_extractor import LLMEntityExtractor, LLMTriggerStrategy
+from .evolution import MemoryEvolver, EvolutionConfig, EvolutionReport
 
 if TYPE_CHECKING:
     from agentscope.message import Msg
@@ -62,7 +67,9 @@ class MemoryIntegration:
     """
     
     def __init__(self, working_dir: str, embedding_model=None, session_id: str = "", 
-                 llm_model=None, enable_llm: bool = True):
+                 llm_model=None, enable_llm: bool = True,
+                 evolution_config: Optional[EvolutionConfig] = None,
+                 enable_evolution: bool = True):
         """Initialize memory integration.
         
         Args:
@@ -71,11 +78,14 @@ class MemoryIntegration:
             session_id: Current session ID for tracking
             llm_model: Optional LLM model for semantic extraction (M4.0)
             enable_llm: Whether to enable LLM extraction
+            evolution_config: Optional configuration for memory evolution (M5.0)
+            enable_evolution: Whether to enable memory evolution (M5.0)
         """
         self.working_dir = Path(working_dir)
         self.storage_dir = self.working_dir / "entity_store"
         self.session_id = session_id
         self.enable_llm = enable_llm
+        self.enable_evolution = enable_evolution
         
         # Initialize core components
         self.store = UnifiedEntityStore(str(self.storage_dir))
@@ -89,6 +99,13 @@ class MemoryIntegration:
         if enable_llm and llm_model:
             self.llm_extractor = LLMEntityExtractor(llm_model)
             logger.info("LLM extraction enabled")
+        
+        # Initialize Memory Evolver (M5.0)
+        self.evolver = None
+        self._evolution_config = evolution_config
+        if enable_evolution:
+            self.evolver = MemoryEvolver(self.store, evolution_config)
+            logger.info("Memory evolution enabled")
         
         logger.info(f"MemoryIntegration initialized for {working_dir}")
         logger.info(f"Existing entities: {len(self.store.get_all_entities())}")
@@ -262,6 +279,144 @@ class MemoryIntegration:
         """Clear all stored entities."""
         self.store.clear()
         logger.info("All entities cleared")
+    
+    # ============================================================
+    # M5.0 Memory Evolution Methods
+    # ============================================================
+    
+    async def evolve(self, force: bool = False) -> Optional[EvolutionReport]:
+        """Run memory evolution cycle (M5.0).
+        
+        Evolution performs:
+        1. Quality evaluation of all entities
+        2. Forgetting low-quality/expired entities
+        3. Merging similar entities
+        
+        Args:
+            force: Force evolution even if interval not reached
+        
+        Returns:
+            EvolutionReport if evolution ran, None if skipped
+        """
+        if not self.evolver:
+            logger.warning("Memory evolution not enabled")
+            return None
+        
+        # Check if evolution should run
+        if not force and not self.evolver.should_evolve():
+            logger.debug("Evolution interval not reached, skipping")
+            return None
+        
+        # Run evolution
+        report = await self.evolver.evolve()
+        
+        # Log results
+        if report and not report.errors:
+            logger.info(f"Evolution complete: {report.summary()}")
+        elif report and report.errors:
+            logger.warning(f"Evolution had errors: {report.errors}")
+        
+        return report
+    
+    def evolve_sync(self, force: bool = False) -> Optional[EvolutionReport]:
+        """Synchronously run memory evolution cycle (M5.0).
+        
+        Args:
+            force: Force evolution even if interval not reached
+        
+        Returns:
+            EvolutionReport if evolution ran, None if skipped
+        """
+        try:
+            loop = asyncio.get_running_loop()
+            # Already in async context, use thread pool
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    asyncio.run,
+                    self.evolve(force)
+                )
+                return future.result()
+        except RuntimeError:
+            # No running loop, can use asyncio.run directly
+            return asyncio.run(self.evolve(force))
+    
+    def should_evolve(self) -> bool:
+        """Check if memory evolution should run.
+        
+        Returns:
+            True if evolution interval has been reached
+        """
+        if not self.evolver:
+            return False
+        return self.evolver.should_evolve()
+    
+    def get_evolution_summary(self) -> dict:
+        """Get summary of evolution state.
+        
+        Returns:
+            Dict with evolution statistics and last report
+        """
+        if not self.evolver:
+            return {"enabled": False}
+        
+        summary = self.evolver.get_evolution_summary()
+        summary["enabled"] = True
+        return summary
+    
+    def get_last_evolution_report(self) -> Optional[EvolutionReport]:
+        """Get the last evolution report.
+        
+        Returns:
+            EvolutionReport from last evolution, or None
+        """
+        if not self.evolver:
+            return None
+        return self.evolver.get_last_report()
+    
+    def evaluate_entity_quality(self, entity: Entity) -> float:
+        """Evaluate quality score for a single entity.
+        
+        Args:
+            entity: Entity to evaluate
+        
+        Returns:
+            Quality score from 0.0 to 1.0
+        """
+        if not self.evolver:
+            return 0.5  # Default mid score if evolution not enabled
+        
+        return self.evolver.evaluator.evaluate(entity)
+    
+    def get_quality_summary(self) -> dict:
+        """Get quality summary of all entities.
+        
+        Returns:
+            Dict with quality distribution statistics
+        """
+        entities = self.store.get_all_entities()
+        if not entities:
+            return {"total": 0}
+        
+        quality_scores = []
+        if self.evolver:
+            quality_map = self.evolver.evaluator.evaluate_all(entities)
+            quality_scores = list(quality_map.values())
+        else:
+            # Fallback: use priority as proxy
+            quality_scores = [e.priority / 100.0 for e in entities]
+        
+        high_quality = sum(1 for q in quality_scores if q >= 0.7)
+        medium_quality = sum(1 for q in quality_scores if 0.3 <= q < 0.7)
+        low_quality = sum(1 for q in quality_scores if q < 0.3)
+        
+        return {
+            "total": len(entities),
+            "high_quality": high_quality,
+            "medium_quality": medium_quality,
+            "low_quality": low_quality,
+            "average_score": sum(quality_scores) / len(quality_scores) if quality_scores else 0,
+        }
     
     # ============================================================
     # Compatibility Methods (for existing code)
