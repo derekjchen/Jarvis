@@ -1,0 +1,39 @@
+{
+  "423fcb4f": {
+    "id": "423fcb4f",
+    "type": "constraint",
+    "name": "安全操作规则",
+    "content": "PRIORITY 1: 破坏性操作必须先询问用户确认。PRIORITY 2: 主动帮助但不越权。冲突时先问。",
+    "category": "",
+    "priority": 100,
+    "source": "manual",
+    "confidence": 1.0,
+    "created_at": "2026-03-29T14:00:19.827441",
+    "last_updated": "2026-03-29T14:00:19.827445",
+    "last_accessed": "2026-03-29T14:00:38.909832",
+    "valid_until": null,
+    "access_count": 1,
+    "context": "用户 Derek 于 2026-03-29 设定的永久规则",
+    "msg_id": "",
+    "session_id": "",
+    "related_entities": [],
+    "tags": [
+      "safety",
+      "priority",
+      "permanent"
+    ],
+    "attributes": {
+      "rule_1": "NEVER run destructive commands without explicit user confirmation",
+      "rule_2": "Be helpful and proactive, BUT never override PRIORITY 1",
+      "rule_3": "When in conflict, ALWAYS ASK FIRST",
+      "destructive_operations": [
+        "delete",
+        "overwrite",
+        "stop",
+        "push",
+        "deploy",
+        "chmod"
+      ]
+    }
+  }
+}
