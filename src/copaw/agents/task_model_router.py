@@ -304,7 +304,7 @@ class ModelSelector:
     # Model recommendations for each task type
     # Format: (model_id, cost_tier, expected_quality)
     MODEL_RECOMMENDATIONS = {
-        TaskType.COMPLEX_REASONING: ("qwen3-max", 3, 9),
+        TaskType.COMPLEX_REASONING: ("glm-5", 3, 9),
         TaskType.CODE_GENERATION: ("qwen3-coder-next", 2, 9),
         TaskType.CODE_DEBUGGING: ("qwen3-coder-next", 2, 9),
         TaskType.CODE_REVIEW: ("qwen3-coder-plus", 2, 8),
