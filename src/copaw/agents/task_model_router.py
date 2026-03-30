@@ -304,17 +304,34 @@ class ModelSelector:
     # Model recommendations for each task type
     # Format: (model_id, cost_tier, expected_quality)
     MODEL_RECOMMENDATIONS = {
+        # GLM-5: 逻辑推理最强 (MMLU/MATH/GPQA 高分)
         TaskType.COMPLEX_REASONING: ("glm-5", 3, 9),
+        
+        # Qwen3 Coder Next: 代码生成最强 (HumanEval/MBPP 高分)
         TaskType.CODE_GENERATION: ("qwen3-coder-next", 2, 9),
-        TaskType.CODE_DEBUGGING: ("qwen3-coder-next", 2, 9),
+        
+        # GLM-5: 调试需要推理 + 代码理解
+        TaskType.CODE_DEBUGGING: ("glm-5", 3, 9),
+        
+        # Qwen3 Coder Plus: 代码审查性价比高
         TaskType.CODE_REVIEW: ("qwen3-coder-plus", 2, 8),
+        
+        # Qwen3.5 Plus: 简单问答性价比最高
         TaskType.SIMPLE_QA: ("qwen3.5-plus", 1, 7),
+        
+        # Qwen3.5 Plus: 快速命令响应快
         TaskType.QUICK_COMMAND: ("qwen3.5-plus", 1, 6),
-        TaskType.LONG_DOCUMENT: ("qwen3-max", 3, 8),
-        TaskType.MEMORY_EVOLUTION: ("qwen3.5-plus", 1, 7),  # Background task, use cheaper
-        TaskType.GENERAL: ("qwen3-max", 2, 8),  # Default to strong model
+        
+        # Kimi K2.5: 长文档理解最强 (128K context benchmark 高分)
+        TaskType.LONG_DOCUMENT: ("kimi-k2.5", 2, 9),
+        
+        # Qwen3.5 Plus: 后台任务用便宜模型
+        TaskType.MEMORY_EVOLUTION: ("qwen3.5-plus", 1, 7),
+        
+        # GLM-5: 默认用推理强的模型
+        TaskType.GENERAL: ("glm-5", 2, 8),
     }
-    
+
     # Provider ID for all models
     DEFAULT_PROVIDER = "aliyun-codingplan"
     
