@@ -49,6 +49,13 @@ from .memory.memory_v3_bridge import (
     get_memory_context,
 )
 from .memory.unified.integration import MemoryIntegration, get_memory_integration
+from .task_model_router import (
+    DynamicModelSwitcher,
+    TaskAnalysis,
+    ModelSelection,
+    TaskType,
+    recommend_model_for_task,
+)
 from .utils import process_file_and_media_blocks_in_message
 from ..agents.memory import MemoryManager
 from ..config import load_config
@@ -117,6 +124,11 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
         self._max_input_length = max_input_length
         self._mcp_clients = mcp_clients or []
         self._namesake_strategy = namesake_strategy
+
+        # Intelligent model routing attributes
+        self._model_switcher: Optional[DynamicModelSwitcher] = None
+        self._last_model_selection: Optional[ModelSelection] = None
+        self._current_model_id: str = "qwen3-max"  # Default model
 
         # Memory compaction threshold: configurable ratio of max_input_length
         self._memory_compact_threshold = int(
@@ -578,6 +590,61 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
         except Exception:  # pylint: disable=broad-except
             return None
 
+
+    # ============================================================
+    # Intelligent Model Routing Helper Methods
+    # ============================================================
+
+    def _get_model_switcher(self) -> "DynamicModelSwitcher":
+        """Lazy-load model switcher to avoid startup dependency."""
+        if self._model_switcher is None:
+            try:
+                from ..providers.provider_manager import ProviderManager
+                provider_manager = ProviderManager.get_instance()
+                self._model_switcher = DynamicModelSwitcher(provider_manager)
+                logger.info("DynamicModelSwitcher initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize model switcher: {e}")
+                self._model_switcher = DynamicModelSwitcher(None)
+        return self._model_switcher
+
+    def _extract_user_text(self, msg) -> str:
+        """Extract user text from message for task analysis."""
+        if isinstance(msg, list):
+            for m in reversed(msg):
+                if getattr(m, "role", None) == "user":
+                    return self._get_text_content(m)
+            return ""
+        elif hasattr(msg, "role") and msg.role == "user":
+            return self._get_text_content(msg)
+        return ""
+
+    def _get_text_content(self, msg) -> str:
+        """Get text content from message."""
+        content = getattr(msg, "content", "")
+        if isinstance(content, str):
+            return content
+        elif isinstance(content, list):
+            texts = []
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "text":
+                    texts.append(block.get("text", ""))
+                elif isinstance(block, str):
+                    texts.append(block)
+            return " ".join(texts)
+        return ""
+
+    async def _refresh_model_instance(self, model_id: str) -> None:
+        """Refresh model instance after model switch."""
+        try:
+            model, formatter = create_model_and_formatter()
+            self.model = model
+            self.formatter = formatter
+            self._current_model_id = model_id
+            logger.info(f"Model instance refreshed: {model_id}")
+        except Exception as e:
+            logger.warning(f"Failed to refresh model instance: {e}")
+
     async def reply(
         self,
         msg: Msg | list[Msg] | None = None,
@@ -592,6 +659,34 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
         Returns:
             Response message
         """
+        # ============================================================
+        # Step 1: Intelligent Model Routing (before processing)
+        # ============================================================
+        user_text = self._extract_user_text(msg) if msg else ""
+        
+        if user_text and len(user_text) > 5:  # Skip very short messages
+            try:
+                switcher = self._get_model_switcher()
+                recommended_model = recommend_model_for_task(user_text)
+                
+                # Log routing decision
+                logger.info(
+                    "Task routing: recommended_model=%s, current_model=%s",
+                    recommended_model,
+                    self._current_model_id,
+                )
+                
+                # Switch model if different from current
+                if recommended_model != self._current_model_id:
+                    await self._refresh_model_instance(recommended_model)
+                    logger.info(f"Model switched: {self._current_model_id} -> {recommended_model}")
+                    
+            except Exception as e:
+                logger.warning(f"Model routing failed, using current model: {e}")
+
+        # ============================================================
+        # Step 2: Process message (existing logic)
+        # ============================================================
         # Process file and media blocks in messages
         if msg is not None:
             await process_file_and_media_blocks_in_message(msg)
