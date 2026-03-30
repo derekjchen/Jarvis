@@ -1,0 +1,575 @@
+{
+  "test_round": 1,
+  "start_time": "2026-03-08T15:19:39.944014",
+  "environments": {
+    "new_echo": {
+      "url": "http://39.96.212.215:8088/api/agent/process",
+      "memory_v2": true
+    },
+    "old_echo": {
+      "url": "http://localhost:8093/api/agent/process",
+      "memory_v2": false
+    }
+  },
+  "categories": {
+    "cross_session": [
+      {
+        "test_id": "T15_MULTI_PART1",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:19:39.944261",
+        "input": "我是王刚，负责AI研发",
+        "expected": [
+          {
+            "name": "王刚",
+            "type": "person"
+          },
+          {
+            "name": "AI研发",
+            "type": "project"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474316d050>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次介绍自己是王刚，负责AI研发。我刚才已经记录了这个信息，现在应该确认并欢迎他，看看他有什么需要帮助的。你好，王刚！我记得你，你负责AI研发。\n\n我之前已经记录了你的信息。请问今天有什么我可以帮你的吗？比如：\n\n- 🤖 AI模型开发或优化\n- 📊 数据处理与分析\n- 💻 代码编写与调试\n- 📝 技术文档撰写\n- 🔧 其他研发相关工作\n\n随时告诉我你的需求！用户再次介绍自己是王刚，负责AI研发。我刚才已经记录了这个信息，现在应该确认并欢迎他，看看他有什么需要帮助的。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T16_MULTI_PART2",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:20:17.100775",
+        "input": "我们团队有5个人",
+        "expected": "",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f4743178650>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户说他们团队有5个人，但没有具体说明需要我做什么。这可能是：\n1. 用户想让我记录这个信息\n2. 用户接下来会有更多问题\n3. 用户可能想让我帮忙做一些团队相关的事情\n\n我应该友好地回应，并询问用户具体需要什么帮助。我也可以主动建议一些可能的用途。好的，我了解了。您的团队有5个人。\n\n请问您需要我帮您做些什么呢？例如：\n\n1. **记录团队成员信息** - 如果您想，我可以帮您创建一个团队文档来记录成员信息\n2. **任务分配** - 帮您规划任务分配或项目安排\n3. **日程管理** - 设置团队会议提醒或定期任务\n4. **其他需求** - 请告诉我您具体想做什么\n\n请告诉我您的需求！用户说他们团队有5个人，但没有具体说明需要我做什么。这可能是：\n1. 用户想让我记录这个信息\n2. 用户接下来会有更多问题\n3. 用户可能想让我帮忙做一些团队相关的事情\n\n我应该友好地回应，并询问用户具体需要什么帮助。我也可以主动建议一些可能的用途。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T17_CROSS_SESSION",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:20:55.967700",
+        "input": "我是谁？我负责什么？",
+        "expected": "",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f4743179dd0>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次问同样的问题，让我再搜索一下记忆文件，看看是否有更多信息。用户再次问同样的问题，让我再搜索一下记忆文件，看看是否有更多信息。让我直接读取记忆文件。让我直接读取记忆文件。好的，确认了用户的信息。让我回答用户的问题。根据记忆记录，您的信息如下：\n\n**姓名**：王刚\n\n**职责**：AI研发\n\n---\n\n如果您有新的信息想要补充或更新，请随时告诉我。好的，确认了用户的信息。让我回答用户的问题。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T17_CROSS_USER",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:21:36.282161",
+        "input": "我叫李四，是产品经理",
+        "expected": [
+          {
+            "name": "李四",
+            "type": "person"
+          },
+          {
+            "name": "产品经理",
+            "type": "concept"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f4743179c90>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次告诉我他的名字是李四，是产品经理。我之前已经在回复中确认了这个信息。可能用户希望我把这个信息记录到记忆中，这样以后可以记住这个信息。\n\n让我搜索一下是否有记忆文件存在，然后将这个信息保存到记忆中。用户再次告诉我他的名字是李四，是产品经理。我之前已经在回复中确认了这个信息。可能用户希望我把这个信息记录到记忆中，这样以后可以记住这个信息。\n\n让我搜索一下是否有记忆文件存在，然后将这个信息保存到记忆中。Let me check if there's a MEMORY.md file or any memory files that might have this information.Let me check if there's a MEMORY.md file or any memory files that might have this information.Let me check the colleagues.md and wang_gang.md files to see what's already stored there.Let me check the colleagues.md and wang_gang.md files to see what's already stored there.现在我了解了memory文件夹的结构。我应该把李四的信息记录到colleagues.md文件中，因为这是同事信息文件。让我更新这个文件，添加李四的信息。现在我了解了memory文件夹的结构。我应该把李四的信息记录到colleagues.md文件中，因为这是同事信息文件。让我更新这个文件，添加李四的信息。好的，我已经将李四的信息添加到同事信息文件中了。现在我可以回复用户，告诉他我已经记录了他的信息。好的，李四！我已经记录了您的信息：\n\n- **姓名**：李四\n- **职位**：产品经理\n\n信息已保存到我的记忆中。有什么我可以帮您的吗？好的，我已经将李四的信息添加到同事信息文件中了。现在我可以回复用户，告诉他我已经记录了他的信息。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      }
+    ],
+    "edge_cases": [
+      {
+        "test_id": "T18_EMPTY",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:22:25.650831",
+        "input": "你好",
+        "expected": "正常响应，不报错",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317b310>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次说\"你好\"，可能是测试我的响应，或者只是打招呼。我应该友好地回应。你好！😊\n\n有什么我可以帮你的吗？无论是文件处理、命令执行、浏览器操作还是其他任务，我都很乐意协助你！用户再次说\"你好\"，可能是测试我的响应，或者只是打招呼。我应该友好地回应。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T19_SPECIAL_CHARS",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:23:01.719173",
+        "input": "文件路径是 /root/data/test-file_v2.json，配置项是 {\"key\": \"value\"}",
+        "expected": "正确处理特殊字符，不触发JSON解析错误",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474316c750>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次给出了同样的文件路径和配置项。可能用户是想确认文件是否存在，或者想要更新这个文件。让我先检查一下文件当前的内容。让我先查看一下文件当前的内容：用户再次给出了同样的文件路径和配置项。可能用户是想确认文件是否存在，或者想要更新这个文件。让我先检查一下文件当前的内容。文件已经存在，内容就是 {\"key\": \"value\"}，与用户要求的配置项一致。文件内容已经符合要求了。✅ 文件已存在且内容正确！\n\n- **文件路径**: `/root/data/test-file_v2.json`\n- **当前内容**: `{\"key\": \"value\"}`\n\n该文件已经包含了您指定的配置项 `{\"key\": \"value\"}`，无需修改。文件已经存在，内容就是 {\"key\": \"value\"}，与用户要求的配置项一致。文件内容已经符合要求了。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T20_LONG_TEXT",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:23:41.356292",
+        "input": "这是一个关于航天领域的详细介绍。航天技术是探索、开发和利用太空的综合技术。它包括航天器技术、运载火箭技术、测控技术、发射场技术、着陆技术等多个方面。近年来，商业航天快速发展，SpaceX、蓝色起源等公司推动了火箭回收技术的进步，大幅降低了发射成本。中国的商业航天也在崛起，多家民营企业进入火箭发射、卫星制造等领域。随着技术进步，卫星互联网、太空旅游、小行星采矿等新兴领域正在发展。未来十年，航天产业将迎来更大的变革。",
+        "expected": [
+          {
+            "name": "SpaceX",
+            "type": "organization"
+          },
+          {
+            "name": "蓝色起源",
+            "type": "organization"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317eb50>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次发送了相同的内容，没有提出具体的问题或请求。这可能是：\n1. 用户想让我对这段内容做些什么，但没有明确说明\n2. 用户可能是在测试或重复发送\n3. 用户可能希望我采取某种默认行动\n\n我应该询问用户的具体需求，看他们想让我如何处理这段内容。我可以提供一些建议选项。您好！我看到您发送了这段关于航天领域的介绍。请问您希望我如何处理这段内容呢？\n\n我可以帮您：\n\n1. **保存文档** - 将内容保存为 Markdown 或文本文件\n2. **内容总结** - 提炼要点或生成摘要\n3. **结构化整理** - 添加标题、分段、列表等格式\n4. **内容扩展** - 补充更多航天领域的相关信息\n5. **翻译** - 将内容翻译成英文或其他语言\n6. **提取关键词** - 分析并提取核心关键词\n\n请告诉我您的具体需求，我会为您处理！用户再次发送了相同的内容，没有提出具体的问题或请求。这可能是：\n1. 用户想让我对这段内容做些什么，但没有明确说明\n2. 用户可能是在测试或重复发送\n3. 用户可能希望我采取某种默认行动\n\n我应该询问用户的具体需求，看他们想让我如何处理这段内容。我可以提供一些建议选项。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T21_JSON_IN_TEXT",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:24:22.091403",
+        "input": "服务器返回了错误：{\"error\": \"timeout\", \"code\": 500}，请检查网络",
+        "expected": "不将文本中的JSON误解析为响应",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317d650>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次报告了同样的错误。我之前已经检查过网络是正常的，所以这个错误应该是服务器端的问题。让我再次确认网络状态，并给用户一些更具体的建议。让我再次确认网络状态：用户再次报告了同样的错误。我之前已经检查过网络是正常的，所以这个错误应该是服务器端的问题。让我再次确认网络状态，并给用户一些更具体的建议。好的，看起来：\n- baidu.com 连接正常 (HTTP 200)\n- google.com 连接超时\n\n这说明网络本身是可以用的，但可能有某些限制（比如防火墙）。这是比较常见的情况，特别是在中国大陆的环境中。\n\n对于用户遇到的 timeout 和 code 500 错误，这仍然是服务器端的问题，不是本地网络问题。用户的网络可以正常访问国内网站。## 网络诊断结果\n\n| 测试目标 | 状态 |\n|----------|------|\n| baidu.com | ✅ 正常连接 (HTTP 200) |\n| google.com | ❌ 连接超时 |\n\n### 结论\n\n**您的网络是正常的**（可以正常访问国内网站）。Google 超时是由于网络策略限制，这属于正常现象。\n\n### 关于 `{\"error\": \"timeout\", \"code\": 500}` 错误\n\n这是**服务器端错误**，500 错误码表示服务器内部问题，timeout 表示服务器处理超时。这通常不是您本地网络的问题。\n\n### 建议操作\n\n1. **稍等后重试** - 服务器可能暂时过载\n2. **检查请求是否正确** - 确认 API 参数、格式等\n3. **联系服务提供方** - 如果问题持续存在\n\n请问您具体是在访问哪个服务时遇到这个错误？我可以帮您进一步分析。好的，看起来：\n- baidu.com 连接正常 (HTTP 200)\n- google.com 连接超时\n\n这说明网络本身是可以用的，但可能有某些限制（比如防火墙）。这是比较常见的情况，特别是在中国大陆的环境中。\n\n对于用户遇到的 timeout 和 code 500 错误，这仍然是服务器端的问题，不是本地网络问题。用户的网络可以正常访问国内网站。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T22_AMBIGUOUS_ENTITY",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:25:13.716697",
+        "input": "苹果发布了新产品，下周在北京开发布会",
+        "expected": [
+          {
+            "name": "苹果",
+            "type": "organization"
+          },
+          {
+            "name": "北京",
+            "type": "location"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317d650>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次发送了相同的消息。可能是因为：\n1. 用户没有看到我之前的回复\n2. 用户想要确认信息\n3. 用户想要我做更多的事情\n\n我应该确认我已经记录了这个信息，并询问用户是否有其他需求或想要我做什么具体的事情。是的，我已经收到并记录了这个信息！📱\n\n**已记录：**\n- 🍎 苹果发布新产品\n- 📍 发布会地点：北京\n- 📅 时间：下周\n\n我注意到这条消息您发送了两次，请问您是否需要我：\n\n1. **设置提醒** - 提醒您关注发布会？\n2. **创建日程** - 如果有具体日期，帮您安排时间？\n3. **搜索更多详情** - 帮您查找发布会的具体信息？\n4. **其他安排** - 您有什么具体想让我帮您做的吗？\n\n请告诉我您的需求！😊用户再次发送了相同的消息。可能是因为：\n1. 用户没有看到我之前的回复\n2. 用户想要确认信息\n3. 用户想要我做更多的事情\n\n我应该确认我已经记录了这个信息，并询问用户是否有其他需求或想要我做什么具体的事情。",
+          "elapsed_ms": 2,
+          "status_code": 200
+        }
+      }
+    ],
+    "entity_extraction": [
+      {
+        "test_id": "T01_PERSON_LOC",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:25:53.552938",
+        "input": "张伟是我的同事，他在北京工作",
+        "expected": [
+          {
+            "name": "张伟",
+            "type": "person"
+          },
+          {
+            "name": "北京",
+            "type": "location"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474315d350>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次告诉我张伟是同事，在北京工作。这个信息我之前已经记录过了。我应该确认我已经知道这个信息，并且已经保存了。是的，我记得！张伟是您的同事，他在北京工作。这个信息我已经记录在案了。\n\n如果您有其他同事的信息需要记录，或者想了解关于张伟的更多情况，随时告诉我。用户再次告诉我张伟是同事，在北京工作。这个信息我之前已经记录过了。我应该确认我已经知道这个信息，并且已经保存了。",
+          "elapsed_ms": 2,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T02_PROJECT_DATE",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:26:30.365856",
+        "input": "我们正在开发火星探测项目，预计明年完成",
+        "expected": [
+          {
+            "name": "火星探测项目",
+            "type": "project"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474316d350>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户重复发送了同样的信息，可能是想确认我已经记录了，或者可能是误操作。我应该告知用户这条信息已经记录过了，并询问是否有新的信息需要添加或更新。这条信息我已经记录过了！目前记录的内容如下：\n\n**火星探测项目**\n- 状态：开发中\n- 预计完成时间：明年（2026年）\n\n您是否有新的进展或信息需要补充？例如：\n- 具体的里程碑节点\n- 团队成员信息\n- 技术方案或决策\n- 当前开发进度\n\n我都可以帮您更新到项目记忆中。用户重复发送了同样的信息，可能是想确认我已经记录了，或者可能是误操作。我应该告知用户这条信息已经记录过了，并询问是否有新的信息需要添加或更新。",
+          "elapsed_ms": 4,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T03_TECH",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:27:09.007737",
+        "input": "系统使用Python和Kubernetes构建，数据库用PostgreSQL",
+        "expected": [
+          {
+            "name": "Python",
+            "type": "technology"
+          },
+          {
+            "name": "Kubernetes",
+            "type": "technology"
+          },
+          {
+            "name": "PostgreSQL",
+            "type": "technology"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f4743178dd0>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次重复了系统的技术栈信息：\n- Python\n- Kubernetes  \n- PostgreSQL\n\n但没有提出具体的需求或任务。我应该再次询问他们具体想要我帮助完成什么工作。我已记录您的系统技术栈信息：\n\n| 组件 | 技术选型 |\n|------|----------|\n| 后端语言 | Python |\n| 容器编排 | Kubernetes |\n| 数据库 | PostgreSQL |\n\n请问您有具体的任务需要我协助吗？例如：\n\n- 🚀 **部署/配置问题**\n- 🐛 **故障排查**\n- 💻 **代码开发**\n- 📊 **数据库操作**\n- 📝 **文档编写**\n\n请描述您的具体需求，我来帮您解决。用户再次重复了系统的技术栈信息：\n- Python\n- Kubernetes  \n- PostgreSQL\n\n但没有提出具体的需求或任务。我应该再次询问他们具体想要我帮助完成什么工作。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T04_DATE",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:27:49.982302",
+        "input": "项目将在2025年6月15日正式发布",
+        "expected": [
+          {
+            "name": "2025年6月15日",
+            "type": "date"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f47431887d0>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次告诉我项目将在2025年6月15日正式发布。这个信息我已经记录过了。我应该：\n1. 确认这个信息已经记录\n2. 或者询问用户是否需要更新或补充其他信息\n\n让我先检查一下当前的记忆状态。用户再次告诉我项目将在2025年6月15日正式发布。这个信息我已经记录过了。我应该：\n1. 确认这个信息已经记录\n2. 或者询问用户是否需要更新或补充其他信息\n\n让我先检查一下当前的记忆状态。该信息已经在 MEMORY.md 中记录过了，我需要告知用户这个信息已经存在。这条信息我已经记录过了！\n\n📅 **项目发布计划**\n- **正式发布日期**: 2025年6月15日\n\n该信息已保存在 `MEMORY.md` 文件中。如果您需要补充更多发布相关的细节（如发布地点、活动安排、发布会流程等），请随时告诉我，我可以帮您更新记录。该信息已经在 MEMORY.md 中记录过了，我需要告知用户这个信息已经存在。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T05_CONCEPT",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:28:31.343287",
+        "input": "这是一个分布式系统的设计，采用了微服务架构",
+        "expected": [
+          {
+            "name": "分布式系统",
+            "type": "concept"
+          },
+          {
+            "name": "微服务架构",
+            "type": "concept"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f4743178610>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户重复了同样的话，说\"这是一个分布式系统的设计，采用了微服务架构\"。这可能意味着：\n1. 用户希望我记录这个信息\n2. 用户可能在测试我\n3. 用户可能希望我基于这个前提做一些事情\n\n我应该主动一些，将这个信息记录到记忆中，并询问更多细节。好的，我来将这个分布式系统的设计信息记录到项目记忆中。用户重复了同样的话，说\"这是一个分布式系统的设计，采用了微服务架构\"。这可能意味着：\n1. 用户希望我记录这个信息\n2. 用户可能在测试我\n3. 用户可能希望我基于这个前提做一些事情\n\n我应该主动一些，将这个信息记录到记忆中，并询问更多细节。已经创建了一个基础的设计文档。现在需要询问用户更多详细信息来完善这个设计。好的，我已经为您创建了一个分布式系统设计的基础记录文件。为了帮助您更好地完成设计，请提供以下详细信息：\n\n---\n\n### 📋 请补充系统设计细节：\n\n**1. 系统基础信息**\n- 系统名称是什么？\n- 系统的主要功能/业务场景是什么？\n\n**2. 微服务拆分**\n- 计划拆分为哪些服务？\n- 各服务的主要职责是什么？\n\n**3. 技术选型**\n- 编程语言/框架偏好？\n- 服务间通信方式（REST/gRPC/消息队列）？\n- 数据库选型（关系型/NoSQL/混合）？\n\n**4. 关键组件**\n- API网关选型？\n- 服务发现方案？\n- 配置中心？\n- 分布式追踪？\n\n**5. 非功能性需求**\n- 预计用户规模？\n- 高可用要求？\n- 性能指标？\n\n---\n\n您可以逐步告诉我这些信息，我会帮您整理成完整的设计文档，并给出专业的架构建议。已经创建了一个基础的设计文档。现在需要询问用户更多详细信息来完善这个设计。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T06_ORG",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:29:18.991854",
+        "input": "阿里巴巴和腾讯都在投资航天领域",
+        "expected": [
+          {
+            "name": "阿里巴巴",
+            "type": "organization"
+          },
+          {
+            "name": "腾讯",
+            "type": "organization"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317a650>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次提到了阿里巴巴和腾讯投资航天领域这个话题。可能是在确认这个信息，或者想要更详细的信息。让我搜索一下是否有相关的记忆信息，然后提供更详细的回答。是的，这是事实！阿里巴巴和腾讯都在积极布局航天领域。以下是具体情况：\n\n## 🚀 腾讯的航天投资版图\n\n腾讯在航天领域投资较为活跃，主要通过投资部门布局海外商业航天公司：\n\n| 投资对象 | 国家/地区 | 业务领域 |\n|----------|-----------|----------|\n| **Moon Express** | 美国 | 月球探测器、月球采矿 |\n| **Planet Labs** | 美国 | 地球成像卫星星座 |\n| **Satellogic** | 阿根廷 | 高分辨率地球观测卫星 |\n| **Kacific** | 新加坡 | 亚太地区卫星宽带服务 |\n| **Vector Space** | 美国 | 小型运载火箭 |\n\n---\n\n## 🛰️ 阿里巴巴的航天布局\n\n阿里巴巴更多聚焦于与自身业务结合的航天应用：\n\n1. **投资中国本土航天企业**\n   - 参与长征火箭相关项目投资\n   - 布局北斗导航产业链\n\n2. **技术融合**\n   - **阿里云**为航天机构提供云计算和大数据处理能力\n   - **高德地图**利用卫星数据提升地图服务\n   - 蚂蚁金服涉足卫星金融服务\n\n3. **战略合作**\n   - 与中国航天科技集团等国有航天企业开展合作\n\n---\n\n## 📊 投资策略对比\n\n| 维度 | 腾讯 | 阿里巴巴 |\n|------|------|----------|\n| **投资风格** | 海外商业航天为主 | 国内航天应用为主 |\n| **业务关联** | 财务投资+战略布局 | 与核心业务深度融合 |\n| **重点领域** | 卫星、运载火箭 | 导航、云计算、数据应用 |\n\n---\n\n## 🔮 未来趋势\n\n- 中国商业航天市场规模预计在2025年达到**2.8万亿元**\n- 卫星互联网被纳入新基建，发展潜力巨大\n- 两大巨头可能进一步加大投资力度\n\n您对哪个具体领域或公司更感兴趣？我可以提供更详细的信息。用户再次提到了阿里巴巴和腾讯投资航天领域这个话题。可能是在确认这个信息，或者想要更详细的信息。让我搜索一下是否有相关的记忆信息，然后提供更详细的回答。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T07_LOCATION",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:30:05.118319",
+        "input": "我们在北京、上海和深圳都有研发中心",
+        "expected": [
+          {
+            "name": "北京",
+            "type": "location"
+          },
+          {
+            "name": "上海",
+            "type": "location"
+          },
+          {
+            "name": "深圳",
+            "type": "location"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474316db50>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次提到公司在北京、上海和深圳有研发中心。这可能是因为：\n1. 用户没有注意到我已经记录了这个信息\n2. 用户想要确认或强调这个信息\n3. 用户可能在测试我是否记住了这个信息\n\n我已经在 memory/office_locations.md 中记录了这个信息。我应该确认这个信息已经被记录，而不是重复创建文件。让我先检查一下是否已经有记录。是的，我之前已经记录了这个信息！让我确认一下：用户再次提到公司在北京、上海和深圳有研发中心。这可能是因为：\n1. 用户没有注意到我已经记录了这个信息\n2. 用户想要确认或强调这个信息\n3. 用户可能在测试我是否记住了这个信息\n\n我已经在 memory/office_locations.md 中记录了这个信息。我应该确认这个信息已经被记录，而不是重复创建文件。让我先检查一下是否已经有记录。用户重复告知同一个信息，我已经记录过了。我应该确认这个信息，并询问用户是否有其他需要帮助的地方。已确认，贵公司的研发中心分布在：\n\n| 城市 | 类型 |\n|------|------|\n| 🏢 北京 | 研发中心 |\n| 🏢 上海 | 研发中心 |\n| 🏢 深圳 | 研发中心 |\n\n这个信息已经在我的记忆中。请问有什么具体的事项需要我帮忙处理吗？比如：\n\n- 安排跨城市的会议协调\n- 查询各研发中心的相关信息\n- 其他工作任务用户重复告知同一个信息，我已经记录过了。我应该确认这个信息，并询问用户是否有其他需要帮助的地方。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      }
+    ],
+    "memory_type": [
+      {
+        "test_id": "T08_DECISION",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:30:49.638748",
+        "input": "经过讨论，我们决定采用微服务架构而不是单体架构",
+        "expected": "",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317c6d0>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户重复了相同的架构决策信息。这可能是测试场景，或者用户可能在确认这个决定。我已经在MEMORY.md中记录了这个决策，让我先检查一下当前的记录状态，确认信息已经保存。用户重复了相同的架构决策信息。这可能是测试场景，或者用户可能在确认这个决定。我已经在MEMORY.md中记录了这个决策，让我先检查一下当前的记录状态，确认信息已经保存。好的，我看到之前的架构决策已经被记录了，而且还补充了一些服务间通信的信息。用户重复发送了同样的消息，可能是：\n1. 网络问题导致重复发送\n2. 想要确认或更新这个决策\n3. 想要补充更多信息\n\n我应该告知用户这个决策已经被记录，并询问是否需要更新或补充更多信息。我注意到这个架构决策已经在之前记录过了。当前记录的内容：\n\n**架构决策** (记录日期: 2025年)\n- ✅ 采用微服务架构\n- ❌ 放弃单体架构方案\n- 📌 决策原因：经过团队讨论，微服务架构更适合项目需求\n\n**服务间通信** (已补充)\n- 通信方式：REST API\n- 数据格式：JSON\n\n---\n\n请问您是否需要：\n1. **更新** 这个决策（比如增加更多原因说明）？\n2. **补充** 新的细节（如服务划分、技术选型）？\n3. **其他修改**？好的，我看到之前的架构决策已经被记录了，而且还补充了一些服务间通信的信息。用户重复发送了同样的消息，可能是：\n1. 网络问题导致重复发送\n2. 想要确认或更新这个决策\n3. 想要补充更多信息\n\n我应该告知用户这个决策已经被记录，并询问是否需要更新或补充更多信息。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T09_EVENT",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:31:36.029166",
+        "input": "项目昨天成功上线，用户反馈很好",
+        "expected": "",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f4743188f90>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次提到项目昨天成功上线，用户反馈很好。看起来用户可能是在确认或强调这个消息，或者希望我把这个重要信息记录下来。\n\n让我帮用户把这个重要的里程碑事件记录到 MEMORY.md 文件中，这样以后可以回顾。太棒了！🎉 恭喜项目成功上线！\n\n让我把这个重要的里程碑记录下来：用户再次提到项目昨天成功上线，用户反馈很好。看起来用户可能是在确认或强调这个消息，或者希望我把这个重要信息记录下来。\n\n让我帮用户把这个重要的里程碑事件记录到 MEMORY.md 文件中，这样以后可以回顾。好的，现在是 2026年3月8日。用户说\"昨天\"项目成功上线，所以项目上线时间应该是 2026年3月7日。\n\n让我把这个重要信息记录到 memory 文件中。好的，现在是 2026年3月8日。用户说\"昨天\"项目成功上线，所以项目上线时间应该是 2026年3月7日。\n\n让我把这个重要信息记录到 memory 文件中。好的，我已经记录了这个重要的里程碑。让我给用户一个积极的回复。已帮你记录了这个重要的里程碑！📝\n\n---\n\n**🎉 项目里程碑**\n\n| 项目 | 内容 |\n|------|------|\n| 上线日期 | 2026年3月7日 |\n| 上线状态 | ✅ 成功 |\n| 用户反馈 | 👍 很好 |\n\n---\n\n恭喜团队！从开发到成功上线，这是一个值得骄傲的成就。用户反馈好说明产品方向正确、质量过硬。\n\n后续如果有需要跟进的事项，比如：\n- 用户反馈的具体问题或建议\n- 系统监控和优化\n- 下一个版本规划\n\n随时告诉我，我可以帮你记录和跟进！💪好的，我已经记录了这个重要的里程碑。让我给用户一个积极的回复。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T10_KNOWLEDGE",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:32:22.876218",
+        "input": "系统使用REST API进行服务间通信，数据格式是JSON",
+        "expected": "",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317eb10>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次重复了相同的架构信息。这可能是因为：\n1. 用户没有看到我之前的回复\n2. 用户想要确认这个信息已被记录\n3. 或者用户只是想强调这一点\n\n我已经在之前的响应中记录了这个信息到MEMORY.md文件中。让我确认一下这个信息是否已经正确保存。让我确认一下这个信息是否已经正确记录：用户再次重复了相同的架构信息。这可能是因为：\n1. 用户没有看到我之前的回复\n2. 用户想要确认这个信息已被记录\n3. 或者用户只是想强调这一点\n\n我已经在之前的响应中记录了这个信息到MEMORY.md文件中。让我确认一下这个信息是否已经正确保存。用户重复了同样的信息，我已经在MEMORY.md中记录了这个信息。我应该确认这个信息已经被正确保存，并向用户说明。✅ **该信息已记录完成！**\n\n当前MEMORY.md中已包含此架构规范：\n\n```\n### 服务间通信\n- **通信方式**: REST API\n- **数据格式**: JSON\n```\n\n这个配置与之前记录的**微服务架构**决策保持一致。REST API + JSON 是微服务间通信的经典组合，具有以下优势：\n- 轻量级、易于调试\n- 跨语言兼容性好\n- 人类可读性强\n- 工具生态成熟\n\n如果您需要补充更多技术细节，例如：\n- API版本管理策略\n- 错误处理规范\n- 请求/响应格式约定\n- HTTP状态码使用规范\n\n请随时告诉我，我可以帮您继续完善记录。用户重复了同样的信息，我已经在MEMORY.md中记录了这个信息。我应该确认这个信息已经被正确保存，并向用户说明。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T11_TODO",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:33:09.577336",
+        "input": "下周需要完成代码审查和性能测试",
+        "expected": "",
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317f1d0>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次提出了同样的任务请求。让我先检查一下之前是否已经记录过这个任务，避免重复记录。用户再次提出了同样的任务请求。让我先检查一下之前是否已经记录过这个任务，避免重复记录。这个任务已经在之前记录过了。用户可能是再次确认或提醒。我应该告诉用户这个任务已经被记录，并显示当前的待办事项状态。这个任务我已经记录过了！当前的下周任务清单如下：\n\n## 📋 下周任务 (2026年3月9日 - 3月15日)\n\n| 任务 | 优先级 | 计划时间 | 状态 |\n|------|--------|----------|------|\n| **代码审查** | 高 | 周一至周三 | ⏳ 待完成 |\n| **性能测试** | 高 | 周四至周五 | ⏳ 待完成 |\n\n记录已保存在 `memory/TODO_202603.md` 文件中。\n\n请问你需要：\n- 添加更多任务详情？\n- 调整时间安排？\n- 添加其他新任务？这个任务已经在之前记录过了。用户可能是再次确认或提醒。我应该告诉用户这个任务已经被记录，并显示当前的待办事项状态。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      }
+    ],
+    "relation_extraction": [
+      {
+        "test_id": "T12_RELATION_PP",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:33:51.416782",
+        "input": "李明负责智慧城市项目，已经开发了两年",
+        "expected": [
+          {
+            "name": "李明",
+            "type": "person"
+          },
+          {
+            "name": "智慧城市项目",
+            "type": "project"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f47431792d0>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户重复提到了这个信息。这可能是想让我把这个信息记录下来，保存到memory中。让我创建一个memory文件来记录这个信息。\n\n我应该检查一下是否有memory目录，然后创建一个记录文件。我来帮您记录这个信息。用户重复提到了这个信息。这可能是想让我把这个信息记录下来，保存到memory中。让我创建一个memory文件来记录这个信息。\n\n我应该检查一下是否有memory目录，然后创建一个记录文件。好的，我看到有 MEMORY.md 文件和 memory 目录。让我先查看 MEMORY.md 的内容，然后添加李明的信息。好的，我看到有 MEMORY.md 文件和 memory 目录。让我先查看 MEMORY.md 的内容，然后添加李明的信息。我看到MEMORY.md文件已经存在，记录了一些项目信息。现在我需要添加李明负责智慧城市项目的信息。我可以使用edit_file来添加这个新信息。我看到MEMORY.md文件已经存在，记录了一些项目信息。现在我需要添加李明负责智慧城市项目的信息。我可以使用edit_file来添加这个新信息。信息已经记录到 MEMORY.md 文件中了。现在我应该向用户确认记录已完成。好的，我已经将这个信息记录下来了：\n\n**智慧城市项目**\n- **负责人**: 李明\n- **项目状态**: 开发中\n- **开发时长**: 已开发两年\n- **记录日期**: 2025年\n\n信息已保存到项目记忆中，后续可以随时查询。请问您还需要补充其他信息吗？信息已经记录到 MEMORY.md 文件中了。现在我应该向用户确认记录已完成。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T13_RELATION_TP",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:34:38.265906",
+        "input": "电商平台项目使用Kafka做消息队列",
+        "expected": [
+          {
+            "name": "电商平台项目",
+            "type": "project"
+          },
+          {
+            "name": "Kafka",
+            "type": "technology"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474317b450>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次询问电商平台使用Kafka做消息队列。我之前已经给出了一些常见场景和帮助方向，但用户可能需要更具体的帮助。让我提供一个更全面的Kafka在电商平台中的应用指南。\n\n用户可能需要：\n1. Kafka的基本概念和架构\n2. 在电商中的具体应用场景\n3. 代码示例\n4. 配置和最佳实践\n\n让我给出一个更详细的回答，涵盖这些方面。好的！下面为您详细介绍 **Kafka 在电商平台中的消息队列应用**：\n\n---\n\n## 一、Kafka 核心概念\n\n| 概念 | 说明 |\n|------|------|\n| **Producer** | 消息生产者，发送消息的应用 |\n| **Consumer** | 消息消费者，接收消息的应用 |\n| **Broker** | Kafka服务器节点 |\n| **Topic** | 消息分类/主题，逻辑分区 |\n| **Partition** | 分区，提高并发能力 |\n| **Consumer Group** | 消费者组，实现负载均衡 |\n\n---\n\n## 二、电商平台典型应用场景\n\n### 1. 订单处理流程\n```\n用户下单 → 订单服务 → Kafka(订单Topic) → 支付服务/库存服务/物流服务\n```\n\n### 2. 常见Topic规划\n| Topic名称 | 用途 | 说明 |\n|-----------|------|------|\n| `order-created` | 订单创建 | 新订单消息 |\n| `order-paid` | 订单支付 | 支付成功消息 |\n| `inventory-deduct` | 库存扣减 | 库存变更消息 |\n| `notification` | 消息通知 | 短信/邮件/推送 |\n| `user-behavior` | 用户行为 | 日志采集分析 |\n\n---\n\n## 三、项目集成方案\n\n### 方式一：Spring Boot + Kafka（推荐）\n\n**Maven依赖：**\n```xml\n<dependency>\n    <groupId>org.springframework.kafka</groupId>\n    <artifactId>spring-kafka</artifactId>\n</dependency>\n```\n\n**配置文件 application.yml：**\n```yaml\nspring:\n  kafka:\n    bootstrap-servers: localhost:9092\n    producer:\n      key-serializer: org.apache.kafka.common.serialization.StringSerializer\n      value-serializer: org.apache.kafka.common.serialization.StringSerializer\n      acks: all  # 确保消息不丢失\n    consumer:\n      group-id: ecommerce-group\n      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer\n      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer\n      auto-offset-reset: earliest\n```\n\n**消息生产者：**\n```java\n@Service\npublic class OrderProducer {\n    \n    @Autowired\n    private KafkaTemplate<String, String> kafkaTemplate;\n    \n    public void sendOrderMessage(Order order) {\n        String orderJson = JSON.toJSONString(order);\n        kafkaTemplate.send(\"order-created\", order.getId(), orderJson);\n        log.info(\"订单消息发送成功: {}\", order.getId());\n    }\n}\n```\n\n**消息消费者：**\n```java\n@Service\npublic class OrderConsumer {\n    \n    @KafkaListener(topics = \"order-created\", groupId = \"order-group\")\n    public void consumeOrder(ConsumerRecord<String, String> record) {\n        String orderJson = record.value();\n        Order order = JSON.parseObject(orderJson, Order.class);\n        log.info(\"接收到订单消息: {}\", order.getId());\n        // 处理订单逻辑...\n    }\n}\n```\n\n---\n\n### 方式二：Docker 快速搭建 Kafka\n\n```bash\n# 创建 docker-compose.yml\nversion: '3'\nservices:\n  zookeeper:\n    image: confluentinc/cp-zookeeper:7.3.0\n    environment:\n      ZOOKEEPER_CLIENT_PORT: 2181\n\n  kafka:\n    image: confluentinc/cp-kafka:7.3.0\n    depends_on:\n      - zookeeper\n    ports:\n      - \"9092:9092\"\n    environment:\n      KAFKA_BROKER_ID: 1\n      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181\n      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092\n      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1\n```\n\n```bash\ndocker-compose up -d\n```\n\n---\n\n## 四、电商场景最佳实践\n\n### ✅ 消息可靠性保障\n```yaml\nproducer:\n  acks: all                    # 所有副本确认\n  retries: 3                   # 重试次数\n  enable-idempotence: true     # 幂等性\n\nconsumer:\n  enable-auto-commit: false   # 手动提交offset\n```\n\n### ✅ 消息顺序性\n- 使用相同的 key 发送到同一分区\n- 如订单ID作为key，保证同一订单消息有序\n\n### ✅ 消息幂等性（防重复消费）\n```java\nif (!processedOrderIds.contains(orderId)) {\n    processOrder(order);\n    processedOrderIds.add(orderId);\n}\n```\n\n---\n\n## 五、您需要哪方面帮助？\n\n| 选项 | 具体内容 |\n|------|----------|\n| A | 🚀 帮我搭建完整的Kafka环境 |\n| B | 📝 编写完整的生产者/消费者代码示例 |\n| C | 🏗️ 设计电商消息队列架构方案 |\n| D | ⚙️ Kafka集群部署与配置 |\n| E | 🐛 解决具体问题（消息丢失、积压等） |\n\n请告诉我您的选择或具体需求！用户再次询问电商平台使用Kafka做消息队列。我之前已经给出了一些常见场景和帮助方向，但用户可能需要更具体的帮助。让我提供一个更全面的Kafka在电商平台中的应用指南。\n\n用户可能需要：\n1. Kafka的基本概念和架构\n2. 在电商中的具体应用场景\n3. 代码示例\n4. 配置和最佳实践\n\n让我给出一个更详细的回答，涵盖这些方面。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      },
+      {
+        "test_id": "T14_RELATION_OL",
+        "test_round": 1,
+        "timestamp": "2026-03-08T15:35:47.208912",
+        "input": "腾讯总部在深圳，阿里巴巴在杭州",
+        "expected": [
+          {
+            "name": "腾讯",
+            "type": "organization"
+          },
+          {
+            "name": "深圳",
+            "type": "location"
+          },
+          {
+            "name": "阿里巴巴",
+            "type": "organization"
+          },
+          {
+            "name": "杭州",
+            "type": "location"
+          }
+        ],
+        "new_echo": {
+          "success": false,
+          "error": "HTTPConnectionPool(host='39.96.212.215', port=8088): Max retries exceeded with url: /api/agent/process (Caused by ConnectTimeoutError(<HTTPConnection(host='39.96.212.215', port=8088) at 0x7f474318a910>, 'Connection to 39.96.212.215 timed out. (connect timeout=60)'))",
+          "elapsed_ms": 0
+        },
+        "old_echo": {
+          "success": true,
+          "response": "用户再次重复了同样的信息\"腾讯总部在深圳，阿里巴巴在杭州\"。这可能是在测试我是否能理解并回应，或者用户可能只是简单地陈述一个事实。我应该简短地确认这个信息是正确的。是的，您说得没错！\n\n- **腾讯总部** → 深圳\n- **阿里巴巴总部** → 杭州\n\n这两座城市也因为这些科技巨头而成为中国互联网产业的重要地标。请问还有什么我可以帮您的吗？用户再次重复了同样的信息\"腾讯总部在深圳，阿里巴巴在杭州\"。这可能是在测试我是否能理解并回应，或者用户可能只是简单地陈述一个事实。我应该简短地确认这个信息是正确的。",
+          "elapsed_ms": 3,
+          "status_code": 200
+        }
+      }
+    ]
+  },
+  "end_time": "2026-03-08T15:36:24.174544"
+}

@@ -4,9 +4,12 @@
 
 This module provides utilities for building system prompts from
 markdown configuration files in the working directory.
+
+V2 Enhancement: Also injects entity knowledge base from semantic memory.
 """
 import logging
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -28,20 +31,100 @@ class PromptConfig:
         ("SOUL.md", True),
         ("PROFILE.md", False),
     ]
+    
+    # V2: Entity injection config
+    MAX_ENTITIES = 30  # Maximum entities to inject
+    ENABLE_ENTITY_INJECTION = True  # Can be disabled if needed
+
+
+def get_entity_context(working_dir: Path, max_entities: int = 30) -> Optional[str]:
+    """Get entity context from semantic memory store.
+    
+    V2 Enhancement: Retrieves entities from semantic store and formats
+    them for inclusion in the system prompt.
+    
+    Args:
+        working_dir: Working directory containing semantic_memory/
+        max_entities: Maximum number of entities to include
+        
+    Returns:
+        Formatted entity context string, or None if no entities
+    """
+    if not PromptConfig.ENABLE_ENTITY_INJECTION:
+        return None
+    
+    try:
+        from ..memory_v2 import SemanticStore
+        
+        store_dir = working_dir / "semantic_memory"
+        if not store_dir.exists():
+            logger.debug("Semantic memory store not found at %s", store_dir)
+            return None
+        
+        store = SemanticStore(store_dir)
+        entities = store.get_all_entities()
+        
+        if not entities:
+            logger.debug("No entities in semantic store")
+            return None
+        
+        # Sort by description length (longer = more info) and limit
+        sorted_entities = sorted(
+            entities,
+            key=lambda e: len(e.description) if e.description else 0,
+            reverse=True
+        )[:max_entities]
+        
+        # Group by type for better organization
+        from collections import defaultdict
+        by_type = defaultdict(list)
+        for entity in sorted_entities:
+            type_name = entity.type.value if hasattr(entity.type, 'value') else str(entity.type)
+            by_type[type_name].append(entity)
+        
+        # Format output
+        lines = ["## 已知的关键实体 (Entity Knowledge Base)", ""]
+        lines.append("以下是你从过往对话中记住的重要信息，回答问题时可以参考：")
+        lines.append("")
+        
+        for entity_type, type_entities in sorted(by_type.items()):
+            lines.append(f"### {entity_type.upper()}")
+            for entity in type_entities:
+                desc = entity.description[:100] if entity.description else "无描述"
+                name = entity.name
+                lines.append(f"- **{name}**: {desc}")
+            lines.append("")
+        
+        result = "\n".join(lines)
+        logger.info(
+            "Injected %d entities from semantic memory (%d total in store)",
+            len(sorted_entities),
+            len(entities)
+        )
+        return result
+        
+    except ImportError as e:
+        logger.debug("memory_v2 module not available: %s", e)
+        return None
+    except Exception as e:
+        logger.warning("Failed to get entity context: %s", e)
+        return None
 
 
 class PromptBuilder:
     """Builder for constructing system prompts from markdown files."""
 
-    def __init__(self, working_dir: Path):
+    def __init__(self, working_dir: Path, inject_entities: bool = True):
         """Initialize prompt builder.
 
         Args:
             working_dir: Directory containing markdown configuration files
+            inject_entities: Whether to inject V2 entity context
         """
         self.working_dir = working_dir
         self.prompt_parts = []
         self.loaded_count = 0
+        self.inject_entities = inject_entities
 
     def _load_file(self, filename: str, required: bool) -> bool:
         """Load a single markdown file.
@@ -122,6 +205,18 @@ class PromptBuilder:
             logger.warning("No content loaded from working directory")
             return DEFAULT_SYS_PROMPT
 
+        # V2: Inject entity context
+        if self.inject_entities:
+            entity_context = get_entity_context(
+                self.working_dir,
+                max_entities=PromptConfig.MAX_ENTITIES
+            )
+            if entity_context:
+                if self.prompt_parts:
+                    self.prompt_parts.append("")
+                self.prompt_parts.append(entity_context)
+                logger.info("Entity context injected into system prompt")
+
         # Join all parts with double newlines
         final_prompt = "\n\n".join(self.prompt_parts)
 
@@ -146,14 +241,15 @@ def build_system_prompt_from_working_dir() -> str:
     1. AGENTS.md (required) - Detailed workflows, rules, and guidelines
     2. SOUL.md (required) - Core identity and behavioral principles
     3. PROFILE.md (optional) - Agent identity and user profile
+    4. V2: Entity Knowledge Base (auto) - Entities from semantic memory
 
     Returns:
-        str: Constructed system prompt from markdown files.
+        str: Constructed system prompt from markdown files and entity knowledge.
              If required files don't exist, returns the default prompt.
 
     Example:
         If working_dir contains AGENTS.md, SOUL.md and PROFILE.md, they will be combined:
-        "# AGENTS.md\\n\\n...\\n\\n# SOUL.md\\n\\n...\\n\\n# PROFILE.md\\n\\n..."
+        "# AGENTS.md\\n\\n...\\n\\n# SOUL.md\\n\\n...\\n\\n# PROFILE.md\\n\\n...\\n\\n## 已知的关键实体\\n\\n..."
     """
     from ..constant import WORKING_DIR
 
@@ -215,6 +311,7 @@ __all__ = [
     "build_bootstrap_guidance",
     "PromptBuilder",
     "PromptConfig",
+    "get_entity_context",
     "DEFAULT_SYS_PROMPT",
     "SYS_PROMPT",  # Backward compatibility
 ]

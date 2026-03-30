@@ -1,0 +1,72 @@
+[
+  {
+    "test_id": "T01_PERSON_LOC",
+    "category": "entity_extraction",
+    "description": "测试人名和地点提取",
+    "input": "张伟是我的同事，他在北京工作",
+    "expected_entities": [
+      {"name": "张伟", "type": "person"},
+      {"name": "北京", "type": "location"}
+    ]
+  },
+  {
+    "test_id": "T02_PROJECT_DATE",
+    "category": "entity_extraction", 
+    "description": "测试项目和日期提取",
+    "input": "我们正在开发火星探测项目，预计明年完成",
+    "expected_entities": [
+      {"name": "火星探测项目", "type": "project"}
+    ]
+  },
+  {
+    "test_id": "T03_TECH",
+    "category": "entity_extraction",
+    "description": "测试技术提取",
+    "input": "系统使用Python和Kubernetes构建，数据库用PostgreSQL",
+    "expected_entities": [
+      {"name": "Python", "type": "technology"},
+      {"name": "Kubernetes", "type": "technology"},
+      {"name": "PostgreSQL", "type": "technology"}
+    ]
+  },
+  {
+    "test_id": "T04_DATE",
+    "category": "entity_extraction",
+    "description": "测试日期提取",
+    "input": "项目将在2025年6月15日正式发布",
+    "expected_entities": [
+      {"name": "2025年6月15日", "type": "date"}
+    ]
+  },
+  {
+    "test_id": "T05_CONCEPT",
+    "category": "entity_extraction",
+    "description": "测试概念提取",
+    "input": "这是一个分布式系统的设计，采用了微服务架构",
+    "expected_entities": [
+      {"name": "分布式系统", "type": "concept"},
+      {"name": "微服务架构", "type": "concept"}
+    ]
+  },
+  {
+    "test_id": "T06_ORG",
+    "category": "entity_extraction",
+    "description": "测试组织提取",
+    "input": "阿里巴巴和腾讯都在投资航天领域",
+    "expected_entities": [
+      {"name": "阿里巴巴", "type": "organization"},
+      {"name": "腾讯", "type": "organization"}
+    ]
+  },
+  {
+    "test_id": "T07_LOCATION",
+    "category": "entity_extraction",
+    "description": "测试地点提取",
+    "input": "我们在北京、上海和深圳都有研发中心",
+    "expected_entities": [
+      {"name": "北京", "type": "location"},
+      {"name": "上海", "type": "location"},
+      {"name": "深圳", "type": "location"}
+    ]
+  }
+]

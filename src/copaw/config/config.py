@@ -172,12 +172,25 @@ class AgentsRunningConfig(BaseModel):
     )
 
 
+class MemoryConfig(BaseModel):
+    """Memory system configuration."""
+
+    enable_v2: bool = Field(
+        default=True,
+        description="Enable Memory V2 (semantic memory with entity extraction)",
+    )
+
+
 class AgentsConfig(BaseModel):
     defaults: AgentsDefaultsConfig = Field(
         default_factory=AgentsDefaultsConfig,
     )
     running: AgentsRunningConfig = Field(
         default_factory=AgentsRunningConfig,
+    )
+    memory: MemoryConfig = Field(
+        default_factory=MemoryConfig,
+        description="Memory system configuration",
     )
     language: str = Field(
         default="zh",

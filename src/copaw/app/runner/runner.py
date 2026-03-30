@@ -144,6 +144,18 @@ class AgentRunner(Runner):
                     name=name,
                 )
 
+            # Session inheritance: try to get summary from previous session
+            latest_summary = self.session.get_latest_session_summary(
+                user_id=user_id,
+                max_length=5000,
+                exclude_session_id=session_id,
+            )
+            session_exists = self.session.session_exists(session_id, user_id)
+            inherited_summary = None
+            if not session_exists and latest_summary:
+                logger.info("New session %s inheriting summary from previous session", session_id)
+                inherited_summary = latest_summary
+
             try:
                 await self.session.load_session_state(
                     session_id=session_id,
@@ -157,6 +169,11 @@ class AgentRunner(Runner):
                     e,
                 )
             session_state_loaded = True
+
+            # Apply inherited summary if this was a new session
+            if inherited_summary and hasattr(agent, 'memory') and hasattr(agent.memory, '_compressed_summary'):
+                agent.memory._compressed_summary = inherited_summary
+                logger.info("Applied inherited summary to new session")
 
             # Rebuild system prompt so it always reflects the latest
             # AGENTS.md / SOUL.md / PROFILE.md, not the stale one saved
@@ -229,6 +246,7 @@ class AgentRunner(Runner):
                 # Get config for memory manager
                 config = load_config()
                 max_input_length = config.agents.running.max_input_length
+                enable_v2 = config.agents.memory.enable_v2
 
                 # Create model and formatter
                 chat_model, formatter = create_model_and_formatter()
@@ -251,6 +269,7 @@ class AgentRunner(Runner):
                     toolkit=toolkit,
                     max_input_length=max_input_length,
                     memory_compact_ratio=MEMORY_COMPACT_RATIO,
+                    enable_v2=enable_v2,
                 )
             await self.memory_manager.start()
         except Exception as e:
