@@ -29,6 +29,8 @@ from .runner.repo.json_repo import JsonChatRepository
 from .crons.repo.json_repo import JsonJobRepository
 from .crons.manager import CronManager
 from .runner.manager import ChatManager
+from .runner.graceful_restart import GracefulRestartManager, get_graceful_restart_manager
+from .runner.restart_api import router as restart_router
 from .routers import router as api_router
 from .routers.voice import voice_router
 from ..envs import load_envs_into_environ
@@ -102,6 +104,16 @@ async def lifespan(
     )
 
     runner.set_chat_manager(chat_manager)
+
+    # --- Graceful restart manager init ---
+    graceful_manager = get_graceful_restart_manager()
+    graceful_manager.set_session_manager(runner.session)
+    graceful_manager.set_memory_manager(runner.memory_manager)
+    graceful_manager.set_chat_manager(chat_manager)
+    graceful_manager.set_runner(runner)
+    graceful_manager.set_app(app)
+    app.state.graceful_manager = graceful_manager
+    logger.info("Graceful restart manager initialized")
 
     # --- config file watcher (channels + heartbeat hot-reload on change) ---
     config_watcher = ConfigWatcher(
@@ -498,6 +510,9 @@ def get_version():
 
 
 app.include_router(api_router, prefix="/api")
+
+# Restart management API
+app.include_router(restart_router, prefix="/api")
 
 app.include_router(
     agent_app.router,
